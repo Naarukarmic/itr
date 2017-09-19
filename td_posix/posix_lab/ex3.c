@@ -84,7 +84,11 @@ int main(int argc, char **argv) {
     shared_data = 1;
 
   /* Initialize the R/W lock  */
-  TODO("initialize all members of the_rw_lock");
+  pthread_mutex_init(&the_rw_lock.lock, NULL);
+  pthread_cond_init(&the_rw_lock.read_cond, NULL);
+  pthread_cond_init(&the_rw_lock.write_cond, NULL);
+  the_rw_lock.writers_waiting = 0;
+  the_rw_lock.n_readers = 0;
 
   if (n_writers > 0)   /* Create writer threads                              */
     for (i = 0; i < n_writers ; i++){
@@ -156,9 +160,12 @@ void r_lock (rw_lock_t *rw_lock){
   printf ("r_lock : Reader (Tid :%p) w_w =%d, n_readers = %d \n",
 	  Tid, rw_lock->writers_waiting, rw_lock->n_readers );
 
-  /* We block the reader function iff there are already writers
+  /* We block the reader function if there are already writers
      waiting for the lock or if one already got the lock */
-  TODO("Complete this part");
+  if (the_rw_lock.writers_waiting != 0) {
+    pthread_cond_wait(&the_rw_lock.read_cond, &the_rw_lock.lock);
+    the_rw_lock.n_readers++;
+  }
 
   printf ("r_lock : Reader (Tid :%p) unblocked\n",  Tid);
 }
@@ -170,7 +177,10 @@ void r_unlock (rw_lock_t *rw_lock){
 
   /* If the thread exiting is the last reader, and writers are
      waiting, free one writer */
-  TODO("Complete this part");
+  if (the_rw_lock.n_readers == 1 && the_rw_lock.writers_waiting > 0) {
+    the_rw_lock.n_readers--;
+    pthread_cond_signal(&the_rw_lock.write_cond);
+  }
 
   printf ("r_unlock : Reader (Tid :%p) unlocking resource\n",  Tid);
 }
@@ -186,7 +196,12 @@ void w_lock (rw_lock_t *rw_lock){
 	  Tid, rw_lock->writers_waiting,rw_lock->n_readers);
 
   /* We loop as long as at least one reader or a writer has the lock */
-  TODO("Complete this part");
+  if (the_rw_lock.n_readers =! 0 && the_rw_lock.writers_waiting > 0) {
+    pthread_cond_wait(&the_rw_lock.write_cond, &the_rw_lock.lock);
+    the_rw_lock.n_readers = -1;
+    the_rw_lock.writers_waiting--;
+  }
+
 }
 
 /*---------------------------------------------------------------------------*/
@@ -198,5 +213,15 @@ void w_unlock (rw_lock_t *rw_lock) {
 
   /* If there is no writer waiting, we can free all readers, else free
      one writer */
-  TODO("Complete this part");
+  if (the_rw_lock.writers_waiting == 0) {
+    the_rw_lock.n_readers = 0;
+    pthread_mutex_unlock(&the_rw_lock.lock);
+    pthread_cond_broadcast(&the_rw_lock.read_cond);
+  } 
+  else {
+    the_rw_lock.n_readers = 0;
+    pthread_mutex_unlock(&the_rw_lock.lock);
+    pthread_cond_signal(&the_rw_lock.write_cond);
+  }
+
 }

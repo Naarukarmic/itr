@@ -42,7 +42,12 @@ void *thread_job(void *no_argument) {
   while(i < iter) i++;
 
   /* Notify the environment thread that this thread is now completed         */
-  TODO("Notify environment thread");
+  sem_wait(&ack_semaphore);
+  shared_state.thread_id = my_task_id;
+  shared_state.completed_threads++;
+  sem_post(&ack_semaphore);
+
+  pthread_cond_signal(&shared_state.cond_var);
 
   printf("Thread %p : End of processing\n", my_task_id);
   pthread_exit(NULL);
@@ -77,10 +82,22 @@ int main(int argc, char *argv[]) {
   pthread_mutex_init(&shared_state.mutex, NULL);
   sem_init(&ack_semaphore, 0, 0);
 
+  /* Create threads */
+  while (i < nThreads) {
+    pthread_create(&Threads[i], NULL, &thread_job, NULL);
+    i++;
+  }
 
-  TODO("Create threads");
+  /* Wait for completion of all threads */
+  sem_post(&ack_semaphore);
+  while (ack_threads != nThreads) {
+    pthread_mutex_lock(&shared_state.mutex);
 
-  TODO("Wait for completion of all threads");
+    pthread_cond_wait(&shared_state.cond_var, &shared_state.mutex);
+    ack_threads++;
+
+    pthread_mutex_unlock(&shared_state.mutex);
+  }
 
   /* End of the program, we print some log and finish the program            */
   printf("environment thread (Tid %p) : end,  %d/%d/%d ",

@@ -36,7 +36,8 @@ void *thread_job(void *no_argument) {
 
   printf("Thread %p : End of processing\n", my_task_id);
 
-  TODO("Add proper termination");
+  /* Thread termination */
+  pthread_exit (NULL);
 }
 
 /*****************************************************************************/
@@ -63,9 +64,18 @@ int main(int argc, char *argv[]) {
   /* Initialize parameters                                                   */
   srandom(time(NULL));  /* Initialize generator of random numbers            */
 
-  TODO("Create threads");
+  /* Create threads */
+  while (i < nThreads) {
+    pthread_create(&Threads[i], NULL, &thread_job, NULL);
+    i++;
+  }
 
-  TODO("Wait for completion of all threads");
+  /* Wait for completion of all threads */
+  i = 0;
+  while (i < nThreads) {
+    pthread_join(Threads[i], NULL);
+    i++;
+  }
 
   printf("environment thread (%p) finalized\n", thr_main);
   return EXIT_SUCCESS;
