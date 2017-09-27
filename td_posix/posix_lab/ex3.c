@@ -162,10 +162,12 @@ void r_lock (rw_lock_t *rw_lock){
 
   /* We block the reader function if there are already writers
      waiting for the lock or if one already got the lock */
-  if (the_rw_lock.writers_waiting != 0) {
+  pthread_mutex_lock(&the_rw_lock.lock);
+  while (the_rw_lock.n_readers == -1 || the_rw_lock.writers_waiting > 0) {
     pthread_cond_wait(&the_rw_lock.read_cond, &the_rw_lock.lock);
-    the_rw_lock.n_readers++;
   }
+  the_rw_lock.n_readers++;
+  pthread_mutex_unlock(&the_rw_lock.lock);
 
   printf ("r_lock : Reader (Tid :%p) unblocked\n",  Tid);
 }
@@ -177,10 +179,12 @@ void r_unlock (rw_lock_t *rw_lock){
 
   /* If the thread exiting is the last reader, and writers are
      waiting, free one writer */
+  pthread_mutex_lock(&the_rw_lock.lock);
   if (the_rw_lock.n_readers == 1 && the_rw_lock.writers_waiting > 0) {
-    the_rw_lock.n_readers--;
     pthread_cond_signal(&the_rw_lock.write_cond);
   }
+  the_rw_lock.n_readers--;
+  pthread_mutex_unlock(&the_rw_lock.lock);
 
   printf ("r_unlock : Reader (Tid :%p) unlocking resource\n",  Tid);
 }
@@ -196,11 +200,14 @@ void w_lock (rw_lock_t *rw_lock){
 	  Tid, rw_lock->writers_waiting,rw_lock->n_readers);
 
   /* We loop as long as at least one reader or a writer has the lock */
-  if (the_rw_lock.n_readers =! 0 && the_rw_lock.writers_waiting > 0) {
+  pthread_mutex_lock(&the_rw_lock.lock);
+  the_rw_lock.writers_waiting++;
+  while (the_rw_lock.n_readers != 0) {
     pthread_cond_wait(&the_rw_lock.write_cond, &the_rw_lock.lock);
-    the_rw_lock.n_readers = -1;
-    the_rw_lock.writers_waiting--;
   }
+  the_rw_lock.n_readers = -1;
+  the_rw_lock.writers_waiting--;
+  pthread_mutex_unlock(&the_rw_lock.lock);
 
 }
 
@@ -213,15 +220,12 @@ void w_unlock (rw_lock_t *rw_lock) {
 
   /* If there is no writer waiting, we can free all readers, else free
      one writer */
-  if (the_rw_lock.writers_waiting == 0) {
-    the_rw_lock.n_readers = 0;
-    pthread_mutex_unlock(&the_rw_lock.lock);
-    pthread_cond_broadcast(&the_rw_lock.read_cond);
-  } 
-  else {
-    the_rw_lock.n_readers = 0;
-    pthread_mutex_unlock(&the_rw_lock.lock);
+  pthread_mutex_lock(&the_rw_lock.lock);
+  the_rw_lock.n_readers = 0;
+  if (the_rw_lock.writers_waiting > 0) {
     pthread_cond_signal(&the_rw_lock.write_cond);
+  } else {
+    pthread_cond_broadcast(&the_rw_lock.read_cond);
   }
-
+  pthread_mutex_unlock(&the_rw_lock.lock);
 }

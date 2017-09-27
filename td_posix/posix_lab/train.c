@@ -19,26 +19,30 @@ pthread_t trains [10];
 void *train_job (void *useless_parameter) {
   int n;
   int dir = random() % 2;
+  int next;
   printf ("Train %p created , direction = %d\n" , pthread_self () , dir );
 
   n = T[dir];
   T[dir]++;
 
 
-  if (n == 0)       /* comment #1 */
+  if (n == 0)       /* If the train is the first one to arrive, wait on the critical section */
     sem_wait (&G);
   else
     sem_wait (&F[dir]);
 
   printf ("The train %p is moving! %d\n" , pthread_self (), dir);
-  sleep (3);
+  sleep (1);
 
   T[dir]--;
 
   printf ("Train %p leaving the track ! %d\n" , pthread_self (), dir);
-
-  if (T[dir] == 0) {	/* comment #2 */
-    /* see questions */
+  // printf("dir %d next %d Tdir %d Tnext %d\n", dir, next, T[dir], T[next]);
+  if (T[dir] == 0) {	/* Switch side if one is empty */
+    sem_post(&G);
+    sem_post(&F[1 - dir]);
+  } else {
+    sem_post(&F[dir]);
   }
 
   return NULL;
@@ -49,23 +53,21 @@ void *train_job (void *useless_parameter) {
 int main (int argc, char **argv) {
   int err;
   for (int dir = 0; dir <= 1; dir ++) {
-    err = sem_init (&F[dir], .., ..); /* see questions */
+    err = sem_init (&F[dir], 0, 0); /* FIFO for the arriving trains */
     T[dir] = 0;
   }
 
 
-  sem_init (&G, .., ..); /* see questions */
+  sem_init (&G, 0, 1); /* Only 1 train on the critical track */
 
   /* Thread creation */
   for (int i = 0; i < 10; i++) {
-    TODO("Create threads");
-    /* see questions */
+    pthread_create(&trains[i], NULL, &train_job, NULL);
   }
 
-  /* Thread creation */
+  /* Thread destruction */
   for (int i = 0; i < 10; i++) {
-    /* Wait for the termination of all threads */
-    /* see questions */
+    pthread_join(trains[i], NULL);
   }
 
   return EXIT_SUCCESS;
