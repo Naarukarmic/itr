@@ -1,6 +1,6 @@
 #include "isocket.h"
 
-#define BUF_SIZE 200
+#define BUF_SIZE 1500
 
 int main() {
    int s, s2;
@@ -9,7 +9,7 @@ int main() {
 
    s = i_socket();
 
-   if(i_bind(s, 1818) < 0) {
+   if(i_bind(s, 8080) < 0) {
 	fprintf(stderr, "bind failed\n");
 	exit(1);
    }
