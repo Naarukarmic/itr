@@ -36,7 +36,7 @@ void webserver_process (void *data) {
   pthread_pool_exec(thread_pool, webserver_process, data_args);
 
   if (client_fd == -1)
-    perror("accept");  
+    perror("accept");
 
   recv(client_fd, buffer, bufsize, 0);
   printf ("%s\n", buffer);

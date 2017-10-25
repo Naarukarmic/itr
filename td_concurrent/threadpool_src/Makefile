@@ -29,7 +29,7 @@ lf_web: lf_web.c $(OBJS)
 	$(CC) -o lf_web lf_web.c $(OBJS) $(CFLAGS) $(LDFLAGS)
 
 web_client: web_client.c $(OBJS)
-	$(CC) -o web_client web_client.c $(OBJS) $(CFLAGS) $(LDFLAGS)
+	$(CC) -o web_client web_client.c isocket.c $(OBJS) $(CFLAGS) $(LDFLAGS)
 
 clean:
 	-rm -f *.o *~ *.dSYM
