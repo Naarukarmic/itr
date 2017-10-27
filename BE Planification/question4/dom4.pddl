@@ -29,17 +29,59 @@
 
 
   ;; there are 4 operators in this domain:
-
   ;; move a robot between two adjacent zones
- 
-  ;; mount instrument?i on robot at base base
- 
-  ;; unmount instrument ?i from robot at base base
- 
-  ;; perform task ?t at zone ?z by robot ?r with instrument ?i
- 
+  (:action move
+    :parameters (?r - robot ?from ?to - location)
+    :precondition (and (adjacent ?from ?to)
+                       (at ?r ?from)
+                       (or (= ?to base)
+                           (not (occupied ?to))
+                       )
+    )
+    :effect (and (at ?r ?to)
+                 (not (at ?r ?from))
+                 (occupied ?to)
+                 (not (occupied ?from))
+    )
   )
-
-
+  ;; mount instrument ?i on robot at base base
+  (:action mount
+    :parameters (?r - robot ?i - instrument)
+    :precondition (and (at ?r base)
+                       (available ?i)
+                       (bare ?r)
+    )
+    :effect (and (carry ?r ?i)
+                 (not (bare ?r))
+                 (not (available ?i))
+    )
+  )
+  ;; unmount instrument ?i from robot at base base
+  (:action unmount
+    :parameters (?r - robot ?i - instrument)
+    :precondition (and (at ?r base)
+                       (carry ?r ?i)
+    )
+    :effect (and (not (carry ?r ?i))
+                 (bare ?r)
+                 (available ?i)
+    )
+  )
+  ;; perform task ?t at zone ?z by robot ?r with instrument ?i
+  (:action perform
+    :parameters (?r - robot ?z - zone ?i - instrument ?t - task)
+    :precondition (and (at ?r ?z)
+                       (or (carry ?r ?i)
+                           (fixed ?r ?i)
+                       )
+                       (adapted ?i ?t)
+                       (not (achieved ?t ?z))
+                       (or (independent ?t)
+                           (and (require ?t binage) 
+                                 (achieved binage ?z)))
+    )
+    :effect (achieved ?t ?z)
+  )
+)
 
 
