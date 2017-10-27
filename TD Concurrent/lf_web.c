@@ -48,7 +48,7 @@ void webserver_process (void *data) {
 /******************************************************************************/
 int main(int argc, char **argv) {
   thread_pool = malloc (sizeof (thread_pool));
-  int one = 1, client_fd;
+  int one = 1;
   struct sockaddr_in svr_addr, from;
   socklen_t sin_len = sizeof(from);
   

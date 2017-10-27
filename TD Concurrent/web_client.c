@@ -27,12 +27,14 @@ void connect_get() {
     }
 
     send(sock, req, sizeof(req), 0);
+    sleep(0.3);
+    
     m = 0;
     while((cnt=read(sock, buf, size)) > 0) {
        m += cnt;
        if(m >= 12) break;
     }
-    for(int j = 0; j < 100000000; j++) {}
+
     close(sock);
 }
 
