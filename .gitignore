@@ -6,6 +6,9 @@
 
 # Unignore all dirs
 !*/
-
+!Makefile
+!README
+!LICENSE
+!Rapport
 *.o
 *.pyc
