@@ -78,7 +78,7 @@
                        (not (achieved ?t ?z))
                        (or (independent ?t)
                            (and (require ?t binage) 
-                                 (achieved binage ?z)))
+                                (achieved binage ?z)))
     )
     :effect (achieved ?t ?z)
   )
