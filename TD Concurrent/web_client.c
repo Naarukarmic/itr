@@ -65,31 +65,51 @@ void* periodic_client(void* no_args) {
     pthread_exit(NULL);
 }
 
-void periodic_pool(int m) {
-    int req_n = m * 20;
+void* aperiodic_client(void* no_args) {
+    float client_lat = 0.0;
+    int n = args.n;
+    
+    for(int i = 0; i < n; i++)
+    {
+        client_lat += latency(&connect_get);
+        sleep(0.3 + (rand() % 4));
+    }
+
+    pthread_mutex_lock(&args.mutex);
+    args.lat += client_lat;
+    pthread_mutex_unlock(&args.mutex);
+    // printf("Client latency : %.2f ms\n", client_lat);
+    pthread_exit(NULL);
+}
+
+void thread_dispatcher(int scenario, int nb_client) {
+    int req_n = nb_client * 20;
     int i = 0;
-    pthread_t threads[m];
+    pthread_t threads[nb_client];
 
     args.n = 20;
     pthread_mutex_init(&args.mutex, NULL);
     args.lat = 0.0;
 
-    while(i < m) {
-        pthread_create(&threads[i], NULL, &periodic_client, NULL);
+    while(i < nb_client) {
+        switch(scenario) {
+            case 1:
+                pthread_create(&threads[i], NULL, &periodic_client, NULL);
+                break;
+            case 2:
+                pthread_create(&threads[i], NULL, &aperiodic_client, NULL);
+                break;
+        }
         i++;
     }
 
     i = 0;
-    while (i < m) {
+    while (i < nb_client) {
         pthread_join(threads[i], NULL);
         i++;
     }
     printf("Requests served per second : %.1f\n"
            "Total latency : %.2f ms\n", req_n/(args.lat * 0.001), args.lat);
-}
-
-void aperiodic_client(int n) {
-
 }
 
 int main(int argc, char **argv) {
@@ -100,13 +120,7 @@ int main(int argc, char **argv) {
             "       nCLIENT = n (number of clients)\n");
         return -1;
     }
-    switch(atoi(argv[1])){
-            case 1:
-                periodic_pool(atoi(argv[2]));
-                break;
-            case 2:
-                periodic_pool(atoi(argv[2]));
-                break;
-        }
+
+    thread_dispatcher(atoi(argv[1]), atoi(argv[2]));
     return 0;
 }
