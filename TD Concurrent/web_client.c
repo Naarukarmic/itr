@@ -4,6 +4,12 @@
 
 #define BUF_SIZE 500
 
+struct _args{
+    int n;
+    pthread_mutex_t mutex;
+    float lat;
+} args;
+
 float latency(void (*request)()) {
     struct timeval begin, end;
     float time_spent;
@@ -19,7 +25,7 @@ float latency(void (*request)()) {
 void connect_get() {
     int cnt, m, size = BUF_SIZE;
     char buf[BUF_SIZE];
-    char* req = "GET / HTTP/1.0 \n\n";
+    char req[32] = "    GET / HTTP/1.1 \r\n";
 
     int sock = i_socket();
     char* host = "localhost";
@@ -31,37 +37,55 @@ void connect_get() {
     }
 
     send(sock, req, sizeof(req), 0);
-    sleep(0.3);
 
     m = 0;
     while((cnt=read(sock, buf, size)) > 0) {
         m += cnt;
         if(m >= 12) break;
     }
+    // printf(buf);
 
     close(sock);
 }
 
-void periodic_client(int n) {
-    pthread_mutex_t  mutex;
-    pthread_pool_t *thread_pool = malloc(sizeof(thread_pool));
-    float total_lat = 0.0;
-
-    pthread_mutex_init(&mutex, NULL);
-    // if ((thread_pool = pthread_pool_init(n)) < 0)
-    //     perror ("ERROR: failed to create the thread pool, ");
-    // printf ("\x1B[32m %s \x1B[0m%s", "[MAIN]", "Start processing\n");
-    sleep(1);
+void* periodic_client(void* no_args) {
+    float client_lat = 0.0;
+    int n = args.n;
     
     for(int i = 0; i < n; i++)
     {
-        pthread_mutex_lock(&mutex);
-        total_lat += latency(&connect_get);
-        pthread_mutex_unlock(&mutex);
+        client_lat += latency(&connect_get);
+        sleep(0.3);
     }
 
-    sleep(2);
-    printf("Total latency : %.2f ms\n", total_lat);
+    pthread_mutex_lock(&args.mutex);
+    args.lat += client_lat;
+    pthread_mutex_unlock(&args.mutex);
+    // printf("Client latency : %.2f ms\n", client_lat);
+    pthread_exit(NULL);
+}
+
+void periodic_pool(int m) {
+    int req_n = m * 20;
+    int i = 0;
+    pthread_t threads[m];
+
+    args.n = 20;
+    pthread_mutex_init(&args.mutex, NULL);
+    args.lat = 0.0;
+
+    while(i < m) {
+        pthread_create(&threads[i], NULL, &periodic_client, NULL);
+        i++;
+    }
+
+    i = 0;
+    while (i < m) {
+        pthread_join(threads[i], NULL);
+        i++;
+    }
+    printf("Requests served per second : %.1f\n"
+           "Total latency : %.2f ms\n", req_n/(args.lat * 0.001), args.lat);
 }
 
 void aperiodic_client(int n) {
@@ -78,10 +102,10 @@ int main(int argc, char **argv) {
     }
     switch(atoi(argv[1])){
             case 1:
-                periodic_client(atoi(argv[2]));
+                periodic_pool(atoi(argv[2]));
                 break;
             case 2:
-                aperiodic_client(atoi(argv[2]));
+                periodic_pool(atoi(argv[2]));
                 break;
         }
     return 0;
