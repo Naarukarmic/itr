@@ -11,7 +11,6 @@ void trafic_generator(int proto_id, int packet_size){
     "<!DOCTYPE html><html><head><title>Mon serveur web</title>"
     "<body bgcolor=lightgreen><h1>Hello from my own web server !</h1></body></html>\r\n";
 
-
   switch (proto_id) {
     case 0: 
       proto = "udp";
@@ -35,6 +34,7 @@ void trafic_generator(int proto_id, int packet_size){
     if(n >= 12) break;
   }
   close(s);*/
+
   // Attribution du port 8080 à la socket
   if(i_bind(s, 1234) < 0) {
     fprintf(stderr, "tr_gen bind failed\n");
@@ -53,20 +53,22 @@ void trafic_generator(int proto_id, int packet_size){
 }
 
 int main(int argc, char **argv) {
-    if (argc != 3){
-      printf("    Usage: web_client SCENARIO nCLIENT\n"
-        "       SCENARIO = 0 (UDP) or 1 (TCP)\n"
-        "       packet_size = n (packet size to send)\n");
-      return -1;
-    }
+  if (argc != 3){
+    printf("    Usage: web_client PROTOCOL PACKET_SIZE\n"
+      "       PROTOCOL = 0 (UDP) or 1 (TCP)\n"
+      "       PACKET_SIZE = n (packet size to send)\n");
+    return -1;
+  }
 
-    if(atoi(argv[2]) > 1500 || atoi(argv[2]) < 64){
-      printf("    Error: 64 <= packet size <= 1500\n");
-      return -1;
-    }
+  if (atoi(argv[2]) > 1500 || atoi(argv[2]) < 64) {
+    printf("    Error: 64 <= PACKET_SIZE <= 1500\n");
+    return -1;
+  }
+  if(atoi(argv[1]) > 1 || atoi(argv[1]) < 0){
+    printf("    Error: PROTOCOL = 0 (UDP) or 1 (TCP)\n");
+    return -1;
+  }
 
-    trafic_generator(atoi(argv[1]), atoi(argv[2]));
-    return 0;
+  trafic_generator(atoi(argv[1]), atoi(argv[2]));
+  return 0;
 }
-
-

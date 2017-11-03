@@ -28,7 +28,6 @@ int i_socket()
   return (fd);
 }
 
-
 /*
  * Attibuer un numéro de port la socket
  * Et prépare la socket à recevoir des connexions
