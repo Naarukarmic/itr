@@ -9,13 +9,17 @@ void trafic_generator(int proto_id, int packet_size){
   char proto;
 
   char response[] = "HTTP/1.1 200 OK\r\n"
-  "Content-Type: text/html; charset=UTF-8\r\n\r\n"
-  "<!DOCTYPE html><html><head><title>Mon serveur web</title>"
-  "<body bgcolor=lightgreen><h1>Hello from my own web server !</h1></body></html>\r\n";
+    "Content-Type: text/html; charset=UTF-8\r\n\r\n"
+    "<!DOCTYPE html><html><head><title>Mon serveur web</title>"
+    "<body bgcolor=lightgreen><h1>Hello from my own web server !</h1></body></html>\r\n";
 
 
-  if (proto_id == 0) {proto = 'udp';}
-  if (proto_id == 1) {proto = 'tcp';}
+  if (proto_id == 0) {
+    proto = 'udp';
+  }
+  if (proto_id == 1) {
+    proto = 'tcp';
+  }
 
   s = i_socket_proto(&proto);
 
@@ -46,7 +50,6 @@ void trafic_generator(int proto_id, int packet_size){
     close(s2);
     fprintf(stderr, "déconnexion\n");
   }
-
 }
 
 int main(int argc, char **argv) {
