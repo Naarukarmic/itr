@@ -4,9 +4,7 @@
 
 void trafic_generator(int proto_id, int packet_size){
   int s, s2;
-  int cnt, n, size = BUF_SIZE;
-  char buf[BUF_SIZE];
-  char proto;
+  char* proto;
 
   char response[] = "HTTP/1.1 200 OK\r\n"
     "Content-Type: text/html; charset=UTF-8\r\n\r\n"
@@ -15,13 +13,13 @@ void trafic_generator(int proto_id, int packet_size){
 
 
   if (proto_id == 0) {
-    proto = 'udp';
+    proto = "udp";
   }
   if (proto_id == 1) {
-    proto = 'tcp';
+    proto = "tcp";
   }
 
-  s = i_socket_proto(&proto);
+  s = i_socket_proto(proto);
 
   /*if(i_connect(s, "localhost", 8080) < 0) {
     fprintf(stderr, "connection refused\n");

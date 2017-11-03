@@ -4,8 +4,6 @@
 
 int main() {
     int s, s2;
-    int cnt, size = BUF_SIZE;
-    char buf[BUF_SIZE];
 
     char response[] = "HTTP/1.1 200 OK\r\n"
     "Content-Type: text/html; charset=UTF-8\r\n\r\n"
@@ -13,7 +11,7 @@ int main() {
     "<body bgcolor=lightgreen><h1>Hello from my own web server !</h1></body></html>\r\n";
 
     // Ouverture de la socket s
-    s = i_socket_proto('tcp');
+    s = i_socket_proto("tcp");
 
     // Attribution du port 1234 à la socket
     if(i_bind(s, 8080) < 0) {

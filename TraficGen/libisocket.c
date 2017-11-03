@@ -13,7 +13,7 @@ int i_socket_proto(char* proto_name)
   int sz = 1;
   int fd;
 
-  fd = socket (PF_INET, SOCK_STREAM, getprotobyname(proto_name));
+  fd = socket (PF_INET, SOCK_STREAM, (int) getprotobyname(proto_name));
   setsockopt (fd, SOL_SOCKET, SO_REUSEADDR, &sz, 4);
   return (fd);
 }

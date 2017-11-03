@@ -4,8 +4,6 @@
 
 int main() {
     int s, s2;
-    int cnt, size = BUF_SIZE;
-    char buf[BUF_SIZE];
 
     char response[] = "HTTP/1.1 200 OK\r\n"
     "Content-Type: text/html; charset=UTF-8\r\n\r\n"
