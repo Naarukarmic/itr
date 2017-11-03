@@ -15,7 +15,7 @@ int main() {
 
     // Attribution du port 1234 à la socket
     if(i_bind(s, 8080) < 0) {
-      fprintf(stderr, "bind failed\n");
+      fprintf(stderr, "echo_server bind failed\n");
       exit(1);
     }
 

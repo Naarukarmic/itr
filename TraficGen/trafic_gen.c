@@ -12,11 +12,13 @@ void trafic_generator(int proto_id, int packet_size){
     "<body bgcolor=lightgreen><h1>Hello from my own web server !</h1></body></html>\r\n";
 
 
-  if (proto_id == 0) {
-    proto = "udp";
-  }
-  if (proto_id == 1) {
-    proto = "tcp";
+  switch (proto_id) {
+    case 0: 
+      proto = "udp";
+      break;
+    case 1: 
+      proto = "tcp";
+      break;
   }
 
   s = i_socket_proto(proto);
@@ -33,9 +35,9 @@ void trafic_generator(int proto_id, int packet_size){
     if(n >= 12) break;
   }
   close(s);*/
-  // Attribution du port 1234 à la socket
-  if(i_bind(s, 8080) < 0) {
-    fprintf(stderr, "bind failed\n");
+  // Attribution du port 8080 à la socket
+  if(i_bind(s, 1234) < 0) {
+    fprintf(stderr, "tr_gen bind failed\n");
     exit(1);
   }
 
