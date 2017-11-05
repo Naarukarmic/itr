@@ -1,6 +1,6 @@
 #include "isocket.h"
 
-void udp_traffic(char* host, int port, int proto_id, int packet_size){
+void udp_traffic(char* host, int port, int packet_size){
   int s, s2;
   char* proto;
 
@@ -28,7 +28,7 @@ void udp_traffic(char* host, int port, int proto_id, int packet_size){
   */
 }
 
-void tcp_traffic(char* host, int port, int proto_id, int packet_size){
+void tcp_traffic(char* host, int port, int packet_size){
   int s, s2;
   char* proto;
 
