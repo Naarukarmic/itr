@@ -21,15 +21,15 @@ void trafic_generator(char* host, int port, int proto_id, int packet_size){
   }
 
   s = i_socket_proto(proto);
-  if(i_connect(s, host, port) < 0) {
-    fprintf(stderr, "connection refused\n");
-    exit(1);
-  }
 
-  // Attribution du port 1234 à la socket (cas UDP)
   if (proto_id == 0) {
     if(i_bind(s, 1234) < 0) {
       fprintf(stderr, "tr_gen bind failed\n");
+      exit(1);
+    }
+  } else {
+    if(i_connect(s, host, port) < 0) {
+      fprintf(stderr, "connection refused\n");
       exit(1);
     }
   }
