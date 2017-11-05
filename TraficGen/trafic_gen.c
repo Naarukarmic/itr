@@ -6,6 +6,7 @@ void trafic_generator(char* host, int port, int proto_id, int packet_size){
   int s, s2;
   char* proto;
 
+  char req[32] = "    GET / HTTP/1.1 \r\n";
   char response[] = "HTTP/1.1 200 OK\r\n"
     "Content-Type: text/html; charset=UTF-8\r\n\r\n"
     "<!DOCTYPE html><html><head><title>Mon serveur web</title>"
