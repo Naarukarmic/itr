@@ -2,7 +2,7 @@
 
 #define BUF_SIZE 200
 
-void trafic_generator(int proto_id, int packet_size){
+void trafic_generator(char* host, int port, int proto_id, int packet_size){
   int s, s2;
   char* proto;
 
@@ -21,35 +21,30 @@ void trafic_generator(int proto_id, int packet_size){
   }
 
   s = i_socket_proto(proto);
-
-  /*if(i_connect(s, "localhost", 8080) < 0) {
+  if(i_connect(s, host, port) < 0) {
     fprintf(stderr, "connection refused\n");
     exit(1);
   }
-   
+
+  // Attribution du port 1234 à la socket (cas UDP)
+  if (proto_id == 0) {
+    if(i_bind(s, 1234) < 0) {
+      fprintf(stderr, "tr_gen bind failed\n");
+      exit(1);
+    }
+  }
+  /*
   n = 0;
   while((cnt=read(s, buf, size)) > 0) {
     printf("%s\n", buf);
     n += cnt;
     if(n >= 12) break;
   }
-  close(s);*/
+  close(s);
 
-  // Attribution du port 8080 à la socket
-  if(i_bind(s, 1234) < 0) {
-    fprintf(stderr, "tr_gen bind failed\n");
-    exit(1);
-  }
+  
 
-  for(;;) {
-    s2 = i_accept(s);
-    fprintf(stderr, "connexion client: %d\n", s2);
-      
-    write(s2, response, sizeof(response));
-      
-    close(s2);
-    fprintf(stderr, "déconnexion\n");
-  }
+  */
 }
 
 int main(int argc, char **argv) {
@@ -60,15 +55,15 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  if (atoi(argv[2]) > 1500 || atoi(argv[2]) < 64) {
-    printf("    Error: 64 <= PACKET_SIZE <= 1500\n");
-    return -1;
-  }
   if(atoi(argv[1]) > 1 || atoi(argv[1]) < 0){
     printf("    Error: PROTOCOL = 0 (UDP) or 1 (TCP)\n");
     return -1;
   }
+  if (atoi(argv[2]) > 1500 || atoi(argv[2]) < 64) {
+    printf("    Error: 64 <= PACKET_SIZE <= 1500\n");
+    return -1;
+  }
 
-  trafic_generator(atoi(argv[1]), atoi(argv[2]));
+  trafic_generator("localhost", 8080, atoi(argv[1]), atoi(argv[2]));
   return 0;
 }
