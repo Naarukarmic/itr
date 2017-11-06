@@ -1,14 +1,29 @@
+#include <sys/time.h>
 #include "isocket.h"
 
-void udp_traffic(char* host, int port, int packet_size){
-  int s, s2;
-  char* proto;
+#define BUF_SIZE 200
 
-  char req[32] = "    GET / HTTP/1.1 \r\n";
-  char response[] = "HTTP/1.1 200 OK\r\n"
-    "Content-Type: text/html; charset=UTF-8\r\n\r\n"
-    "<!DOCTYPE html><html><head><title>Mon serveur web</title>"
-    "<body bgcolor=lightgreen><h1>Hello from my own web server !</h1></body></html>\r\n";
+char* gen_packet(int size) {
+  int i = 0;
+  char* msg = malloc(size);
+
+  while(i < size) {
+    msg[i] = 'x';
+    i++;
+  }
+
+  return msg;
+}
+
+void udp_traffic(char* host, int port, int packet_size){
+  int s;
+  char* packet;
+
+  // char req[32] = "    GET / HTTP/1.1 \r\n";
+  // char response[] = "HTTP/1.1 200 OK\r\n"
+  //   "Content-Type: text/html; charset=UTF-8\r\n\r\n"
+  //   "<!DOCTYPE html><html><head><title>Mon serveur web</title>"
+  //   "<body bgcolor=lightgreen><h1>Hello from my own web server !</h1></body></html>\r\n";
 
   s = i_socket_proto("udp");
 
@@ -16,6 +31,8 @@ void udp_traffic(char* host, int port, int packet_size){
     fprintf(stderr, "tr_gen bind failed\n");
     exit(1);
   }
+
+  packet = gen_packet(packet_size);
 
   /*
   n = 0;
@@ -29,14 +46,11 @@ void udp_traffic(char* host, int port, int packet_size){
 }
 
 void tcp_traffic(char* host, int port, int packet_size){
-  int s, s2;
-  char* proto;
-
-  char req[32] = "    GET / HTTP/1.1 \r\n";
-  char response[] = "HTTP/1.1 200 OK\r\n"
-    "Content-Type: text/html; charset=UTF-8\r\n\r\n"
-    "<!DOCTYPE html><html><head><title>Mon serveur web</title>"
-    "<body bgcolor=lightgreen><h1>Hello from my own web server !</h1></body></html>\r\n";
+  int s;
+  char* packet;
+  char* ack[BUF_SIZE];
+  struct timeval begin, end;
+  float time_spent;
 
   s = i_socket_proto("tcp");
 
@@ -45,15 +59,24 @@ void tcp_traffic(char* host, int port, int packet_size){
     exit(1);
   }
 
-  /*
-  n = 0;
-  while((cnt=read(s, buf, size)) > 0) {
-    printf("%s\n", buf);
-    n += cnt;
-    if(n >= 12) break;
+  packet = gen_packet(packet_size);
+
+  gettimeofday(&begin, 0);
+  int tx = send(s, packet, packet_size, 0);
+  if (tx < 0) {
+    perror("send");
   }
+  
+  int rx = recv(s, ack, BUF_SIZE, 0);
+  if (rx < 0) {
+    perror("recv");
+  }
+  gettimeofday(&end, 0);  
+
+  time_spent = (end.tv_sec - begin.tv_sec) * 1000.0f + (end.tv_usec - begin.tv_usec) / 1000.0f;
+
   close(s);
-  */
+  printf("TCP: Sent %d bytes in %.2f ms\n", packet_size, time_spent);
 }
 
 int main(int argc, char **argv) {
