@@ -1,4 +1,5 @@
 #include <sys/time.h>
+#include <arpa/inet.h>
 #include "isocket.h"
 
 #define BUF_SIZE 200
@@ -16,14 +17,13 @@ char* gen_packet(int size) {
 }
 
 void udp_traffic(char* host, int port, int packet_size){
+  struct sockaddr_in hostaddr;
   int s;
   char* packet;
 
-  // char req[32] = "    GET / HTTP/1.1 \r\n";
-  // char response[] = "HTTP/1.1 200 OK\r\n"
-  //   "Content-Type: text/html; charset=UTF-8\r\n\r\n"
-  //   "<!DOCTYPE html><html><head><title>Mon serveur web</title>"
-  //   "<body bgcolor=lightgreen><h1>Hello from my own web server !</h1></body></html>\r\n";
+  hostaddr.sin_family = AF_INET;
+  hostaddr.sin_port = port;
+  inet_aton(host, &hostaddr.sin_addr);
 
   s = i_socket_proto("udp");
 
@@ -34,15 +34,9 @@ void udp_traffic(char* host, int port, int packet_size){
 
   packet = gen_packet(packet_size);
 
-  /*
-  n = 0;
-  while((cnt=read(s, buf, size)) > 0) {
-    printf("%s\n", buf);
-    n += cnt;
-    if(n >= 12) break;
-  }
+  
+
   close(s);
-  */
 }
 
 void tcp_traffic(char* host, int port, int packet_size){
