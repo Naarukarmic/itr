@@ -8,6 +8,16 @@ static struct sockaddr_in portname;
  * Ouverture de la socket
  */
 
+int i_socket_proto(char* proto_name)
+{
+  int sz = 1;
+  int fd;
+
+  fd = socket (PF_INET, SOCK_STREAM, getprotobyname(proto_name)->p_proto);
+  setsockopt (fd, SOL_SOCKET, SO_REUSEADDR, &sz, 4);
+  return (fd);
+}
+
 int i_socket()
 {
   int sz = 1;
