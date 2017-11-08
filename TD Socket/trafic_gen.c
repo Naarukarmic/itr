@@ -9,7 +9,7 @@ char* gen_packet(int size) {
   char* msg = malloc(size);
 
   while(i < size) {
-    msg[i] = 'x';
+    msg[i] = "abcdefghijklmnopqrstuvwxyz"[random() % 26];
     i++;
   }
 

@@ -12,6 +12,7 @@
 #include <strings.h>
 #include <string.h>
 
+int i_socket_proto(char* proto_name);
 int i_socket();
 int i_bind(int s, int port);
 int i_accept(int s);
