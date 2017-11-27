@@ -58,16 +58,22 @@ rtems_id            Semaphore_id[2]   = { 0, 0 };
 /* Task #1 (high priority)                                                    */
 /******************************************************************************/
 
-rtems_task Task_1( rtems_task_argument argument) {\
+rtems_task Task_1(rtems_task_argument argument) {
+  int task_num = (int) argument;
   int i;
   rtems_interval offset = 500;
 
+  printf ("task %d-- : starting\n", task_num); 
+
   rtems_task_wake_after(offset);
-  rtems_semaphore_obtain(Semaphore_id[1], 0, 0);
+  printf ("task %d-- : waking up\n", task_num);
+  rtems_semaphore_obtain(Semaphore_id[1], RTEMS_WAIT, 0);
+  printf ("task %d-- : critical section\n", task_num);
   WASTE_CPU;
   rtems_semaphore_release(Semaphore_id[1]);
   WASTE_CPU;
 
+  printf ("task %d-- : done\n", task_num);
   rtems_task_delete(RTEMS_SELF);
 }
 
@@ -75,14 +81,40 @@ rtems_task Task_1( rtems_task_argument argument) {\
 /* Task #2 (medium priority)                                                  */
 /******************************************************************************/
 
-rtems_task Task_2( rtems_task_argument argument) {
+rtems_task Task_2(rtems_task_argument argument) {
+  int task_num = (int) argument;
+  int i;
+  rtems_interval offset = 600;
+
+  printf ("task %d-- : starting\n", task_num); 
+
+  rtems_task_wake_after(offset);
+  printf ("task %d-- : waking up\n", task_num);
+  WASTE_CPU;
+
+  printf ("task %d-- : done\n", task_num);
+  rtems_task_delete(RTEMS_SELF);
 }
 
 /******************************************************************************/
 /* Task #3 (low priority)                                                     */
 /******************************************************************************/
 
-rtems_task Task_3( rtems_task_argument argument) {
+rtems_task Task_3(rtems_task_argument argument) {
+  int task_num = (int) argument;
+  int i;
+
+  printf ("task %d-- : starting\n", task_num); 
+  printf ("task %d-- : waking up\n", task_num);
+
+  rtems_semaphore_obtain(Semaphore_id[1], RTEMS_WAIT, 0);
+  printf ("task %d-- : critical section\n", task_num);
+  WASTE_CPU;
+  rtems_semaphore_release(Semaphore_id[1]);
+  WASTE_CPU;
+
+  printf ("task %d-- : done\n", task_num);
+  rtems_task_delete(RTEMS_SELF);
 }
 
 /****************************************************************************/
@@ -110,14 +142,15 @@ rtems_task Init( rtems_task_argument argument)
   status = rtems_task_set_priority(RTEMS_SELF, 10, &the_priority);
   status = rtems_task_set_priority
     (RTEMS_SELF, RTEMS_CURRENT_PRIORITY, &the_priority);
-  printf("actual current priority:%d\n", (int)the_priority);
+  printf("main-- Actual current priority:%d\n", (int)the_priority);
   
   /* Create semaphore SM1 */
   Semaphore_name[ 1 ] = rtems_build_name( 'S', 'M', '1', ' ' );
   status = rtems_semaphore_create(Semaphore_name[1],
 				  1,
-				  RTEMS_PRIORITY
+				  RTEMS_FIFO
 				  | RTEMS_BINARY_SEMAPHORE
+				  | RTEMS_PRIORITY_CEILING /* Remove to get priority inversion */
 				  | RTEMS_GLOBAL,
 				  Task_Priority[1],
 				  &id);
@@ -147,16 +180,32 @@ rtems_task Init( rtems_task_argument argument)
 
   /* Lower main task  priority so others tasks begin running  */
   status = rtems_task_set_priority(RTEMS_SELF, 40, &the_priority);
-  printf("main -- current priority : %d, is set to (40) : \n", 
+  printf("main-- current priority: %d, is set to: (40)\n", 
 	 (int)the_priority);
   
+  rtems_task_wake_after(RTEMS_YIELD_PROCESSOR);
+
   /* This will print when other tasks are finished */
   status = rtems_task_set_priority
     (RTEMS_SELF, RTEMS_CURRENT_PRIORITY, &the_priority);
-  printf("main -- current priority : %d\n", (int)the_priority);
+  printf("main-- current priority: %d\n", (int)the_priority);
   
-  printf("main (init) : exit\n");
+  printf("main (init): exit\n");
   rtems_task_delete(RTEMS_SELF);
 }   /* Init end */
 
 
+/* Output without PCP semaphore: visible priority inversion
+task 1-- : starting
+task 2-- : starting
+task 3-- : starting
+task 3-- : waking up
+task 3-- : critical section
+task 1-- : waking up
+/!\ Priority inversion here
+task 2-- : waking up
+task 2-- : done
+task 1-- : critical section
+task 1-- : done
+task 3-- : done
+*/
