@@ -130,8 +130,18 @@ for i in range(100):
     for k,v in p['lowest'].iteritems():
         v[0] = v[1]
 
+# Concatenate all priority dicts and simplify the values
+concat = {}
 for k,v in p.iteritems():
-    print v
+    concat = dict(concat, **v)
+final = {k: v[0] for (k,v) in concat.iteritems()}
+
+# Add the WCRT to the mes dict
+for k,v in final.iteritems():
+	mes[k]['wcrt'] = v
+
+for k,v in mes.iteritems():
+	print k,v
 
 # <message>
 #     <nom>DYYJ-0</nom>
