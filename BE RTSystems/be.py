@@ -85,7 +85,7 @@ def max_delay(d, d1=None, d2=None):
         res = max(res, max_delay(d2))
     return res
 
-def sum_dict(k, d, d1=None, d2=None):
+def sum_dict(k, d, d1=None, d2=None, d3=None):
     res = 0
     for k2,v in d.iteritems():
         if k2 != k:
@@ -96,15 +96,35 @@ def sum_dict(k, d, d1=None, d2=None):
         res += sum_dict(k, d1)
     if d2 is not None:
         res += sum_dict(k, d2)
+    if d3 is not None:
+        res += sum_dict(k, d3)
     return res
 
 for i in range(1000000):
     for k,v in p['highest'].iteritems():
-        print k,v
         v[1] = mes[k]['trans_delay']
         v[1] += max_delay(p['high'], p['low'], p['lowest'])
         v[1] += sum_dict(k, p['highest'])
-        
+    for k,v in p['high'].iteritems():
+        v[1] = mes[k]['trans_delay']
+        v[1] += max_delay(p['low'], p['lowest'])
+        v[1] += sum_dict(k, p['highest'], p['high'])
+    for k,v in p['low'].iteritems():
+        v[1] = mes[k]['trans_delay']
+        v[1] += max_delay(p['lowest'])
+        v[1] += sum_dict(k, p['highest'], p['high'], p['low'])
+    for k,v in p['lowest'].iteritems():
+        v[1] = mes[k]['trans_delay']
+        v[1] += sum_dict(k, p['highest'], p['high'], p['low'], p['lowest'])
+
+    for k,v in p['highest'].iteritems():
+        v[0] = v[1]
+    for k,v in p['high'].iteritems():
+        v[0] = v[1]
+    for k,v in p['low'].iteritems():
+        v[0] = v[1]
+    for k,v in p['lowest'].iteritems():
+        v[0] = v[1]
 
 # for k,v in mes.iteritems():
 #     print v
