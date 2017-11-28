@@ -36,8 +36,8 @@ for k,v in mes.iteritems():
     v['taille_tot'] = mes_size
 
 # Individual transmission delay
-# speed = 1000000.0 # bps -> delay in s
-speed = 1 # Mbps -> delay in us
+speed = 1000000.0 # bps -> delay in s
+# speed = 1 # Mbps -> delay in us
 for k,v in mes.iteritems():
     mes_size = v['taille_tot']
     delay = mes_size / speed
@@ -100,7 +100,7 @@ def sum_dict(k, d, d1=None, d2=None, d3=None):
         res += sum_dict(k, d3)
     return res
 
-for i in range(1000000):
+for i in range(10010):
     for k,v in p['highest'].iteritems():
         v[1] = mes[k]['trans_delay']
         v[1] += max_delay(p['high'], p['low'], p['lowest'])
@@ -126,8 +126,8 @@ for i in range(1000000):
     for k,v in p['lowest'].iteritems():
         v[0] = v[1]
 
-# for k,v in mes.iteritems():
-#     print v
+for k,v in p.iteritems():
+    print v
 
 # <message>
 #     <nom>DYYJ-0</nom>
