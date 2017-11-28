@@ -74,6 +74,7 @@ for k,v in mes.iteritems():
         p['lowest'][k] = [0, 0]
 
 # Then recursively calculate the WCRT
+# Max delay in a priority (or multiple) priority dict
 def max_delay(d, d1=None, d2=None):
     res = 0
     for k,v in d.iteritems():
@@ -85,6 +86,7 @@ def max_delay(d, d1=None, d2=None):
         res = max(res, max_delay(d2))
     return res
 
+# Sum of all delays in one (or multiple) priority dict, avoiding k
 def sum_dict(k, d, d1=None, d2=None, d3=None):
     res = 0
     for k2,v in d.iteritems():
@@ -100,7 +102,8 @@ def sum_dict(k, d, d1=None, d2=None, d3=None):
         res += sum_dict(k, d3)
     return res
 
-for i in range(10010):
+# Apply the formula to all level of priorities
+for i in range(100):
     for k,v in p['highest'].iteritems():
         v[1] = mes[k]['trans_delay']
         v[1] += max_delay(p['high'], p['low'], p['lowest'])
@@ -117,6 +120,7 @@ for i in range(10010):
         v[1] = mes[k]['trans_delay']
         v[1] += sum_dict(k, p['highest'], p['high'], p['low'], p['lowest'])
 
+# Swap old value for new
     for k,v in p['highest'].iteritems():
         v[0] = v[1]
     for k,v in p['high'].iteritems():
