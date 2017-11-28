@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+import math
 
 tree = ET.parse('xmlB1-periodique.xml')
 root = tree.getroot()
@@ -84,11 +85,25 @@ def max_delay(d, d1=None, d2=None):
         res = max(res, max_delay(d2))
     return res
 
+def sum_dict(k, d, d1=None, d2=None):
+    res = 0
+    for k2,v in d.iteritems():
+        if k2 != k:
+            res_i = mes[k2]['trans_delay']
+            res_i *= math.ceil(v[0]*float(mes[k2]['frequence']))
+            res += res_i
+    if d1 is not None:
+        res += sum_dict(k, d1)
+    if d2 is not None:
+        res += sum_dict(k, d2)
+    return res
+
 for i in range(1000000):
     for k,v in p['highest'].iteritems():
         print k,v
         v[1] = mes[k]['trans_delay']
         v[1] += max_delay(p['high'], p['low'], p['lowest'])
+        v[1] += sum_dict(k, p['highest'])
         
 
 # for k,v in mes.iteritems():
