@@ -117,14 +117,8 @@ for i in range(100):
         v[1] += sum_dict(k, p['highest'], p['high'], p['low'], p['lowest'])
 
 # Swap old value for new
-    for k,v in p['highest'].iteritems():
-        v[0] = v[1]
-    for k,v in p['high'].iteritems():
-        v[0] = v[1]
-    for k,v in p['low'].iteritems():
-        v[0] = v[1]
-    for k,v in p['lowest'].iteritems():
-        v[0] = v[1]
+    p = {l: {k: [v[1], v[1]] for k,v in u.iteritems()} 
+            for l,u in p.iteritems()}
 
 # Concatenate all priority dicts and simplify the values
 concat = {}
