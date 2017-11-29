@@ -137,6 +137,8 @@ for k,v in mes.iteritems():
 # Prepare report
 report = {k: {l: str(u) for l,u in v.iteritems()} 
             for k,v in mes.iteritems()}
+for k,v in report.iteritems():
+    v['nom'] = k
 report = {'message nom=\"'+k+'\"': {l: u for l,u in v.iteritems()} 
             for k,v in report.iteritems()}
 
