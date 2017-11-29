@@ -95,11 +95,7 @@ def sum_dict(k, d, d1=None, d2=None, d3=None):
             res_i *= math.ceil(v[0]*float(mes[k2]['frequence']))
             res += res_i
     if d1 is not None:
-        res += sum_dict(k, d1)
-    if d2 is not None:
-        res += sum_dict(k, d2)
-    if d3 is not None:
-        res += sum_dict(k, d3)
+        res += sum_dict(k, d1, d2, d3)
     return res
 
 # Apply the formula to all level of priorities
