@@ -134,10 +134,17 @@ final = {k: v[0] for (k,v) in concat.iteritems()}
 
 # Add the WCRT to the mes dict
 for k,v in final.iteritems():
-	mes[k]['wcrt'] = v
+    mes[k]['wcrt'] = v
 
+# Calculate d2
 for k,v in mes.iteritems():
-	print k,v
+    v['d2'] =  v['wcrt'] - v['trans_delay']
+
+# Prepare report
+report = {k: {l: str(u) for l,u in v.iteritems()} for k,v in mes.iteritems()}
+
+for k,v in report.iteritems():
+    print k,v
 
 # <message>
 #     <nom>DYYJ-0</nom>
