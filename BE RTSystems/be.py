@@ -41,7 +41,7 @@ speed = 1000000.0 # bps -> delay in s
 for k,v in mes.iteritems():
     mes_size = v['taille_tot']
     delay = mes_size / speed
-    v['trans_delay'] = delay
+    v['d3'] = delay
 
 # Transaction table
 freq = map(float, elt['frequence'])
@@ -52,7 +52,7 @@ macro = max(period) # Technically LCM
 # Necessary condition for scheduling
 cond = 0
 for k,v in mes.iteritems():
-    cond += v['trans_delay']
+    cond += v['d3']
 cond /= micro
 print 'CNS: ', cond, '<= 1'
 
@@ -78,8 +78,8 @@ for k,v in mes.iteritems():
 def max_delay(d, d1=None, d2=None):
     res = 0
     for k,v in d.iteritems():
-        if mes[k]['trans_delay'] > res:
-            res = mes[k]['trans_delay']
+        if mes[k]['d3'] > res:
+            res = mes[k]['d3']
     if d1 is not None:
         res = max(res, max_delay(d1))
     if d2 is not None:
@@ -91,7 +91,7 @@ def sum_dict(k, d, d1=None, d2=None, d3=None):
     res = 0
     for k2,v in d.iteritems():
         if k2 != k:
-            res_i = mes[k2]['trans_delay']
+            res_i = mes[k2]['d3']
             res_i *= math.ceil(v[0]*float(mes[k2]['frequence']))
             res += res_i
     if d1 is not None:
@@ -101,19 +101,19 @@ def sum_dict(k, d, d1=None, d2=None, d3=None):
 # Apply the formula to all level of priorities
 for i in range(100):
     for k,v in p['highest'].iteritems():
-        v[1] = mes[k]['trans_delay']
+        v[1] = mes[k]['d3']
         v[1] += max_delay(p['high'], p['low'], p['lowest'])
         v[1] += sum_dict(k, p['highest'])
     for k,v in p['high'].iteritems():
-        v[1] = mes[k]['trans_delay']
+        v[1] = mes[k]['d3']
         v[1] += max_delay(p['low'], p['lowest'])
         v[1] += sum_dict(k, p['highest'], p['high'])
     for k,v in p['low'].iteritems():
-        v[1] = mes[k]['trans_delay']
+        v[1] = mes[k]['d3']
         v[1] += max_delay(p['lowest'])
         v[1] += sum_dict(k, p['highest'], p['high'], p['low'])
     for k,v in p['lowest'].iteritems():
-        v[1] = mes[k]['trans_delay']
+        v[1] = mes[k]['d3']
         v[1] += sum_dict(k, p['highest'], p['high'], p['low'], p['lowest'])
 
     # Swap old value for new
@@ -128,17 +128,40 @@ final = {k: v[0] for (k,v) in concat.iteritems()}
 
 # Add the WCRT to the mes dict
 for k,v in final.iteritems():
-    mes[k]['wcrt'] = v
+    mes[k]['d'] = v
 
 # Calculate d2
 for k,v in mes.iteritems():
-    v['d2'] =  v['wcrt'] - v['trans_delay']
+    v['d2'] =  v['d'] - v['d3']
 
 # Prepare report
-report = {k: {l: str(u) for l,u in v.iteritems()} for k,v in mes.iteritems()}
+report = {k: {l: str(u) for l,u in v.iteritems()} 
+            for k,v in mes.iteritems()}
+report = {'message nom=\"'+k+'\"': {l: u for l,u in v.iteritems()} 
+            for k,v in report.iteritems()}
 
-for k,v in report.iteritems():
-    print k,v
+def data2xml(d, name='data'):
+    r = ET.Element(name)
+    return ET.tostring(buildxml(r, d))
+
+def buildxml(r, d):
+    if isinstance(d, dict):
+        for k, v in d.iteritems():
+            s = ET.SubElement(r, k)
+            buildxml(s, v)
+    elif isinstance(d, tuple) or isinstance(d, list):
+        for v in d:
+            s = ET.SubElement(r, 'i')
+            buildxml(s, v)
+    elif isinstance(d, basestring):
+        r.text = d
+    else:
+        r.text = str(d)
+    return r
+
+with open('report-lemarquand.xml', 'w') as file:
+    file.write('<?xml version = "1.0"?>')
+    file.write(data2xml(report, 'fichier'))
 
 # <message>
 #     <nom>DYYJ-0</nom>
