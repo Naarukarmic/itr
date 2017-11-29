@@ -116,7 +116,7 @@ for i in range(100):
         v[1] = mes[k]['trans_delay']
         v[1] += sum_dict(k, p['highest'], p['high'], p['low'], p['lowest'])
 
-# Swap old value for new
+    # Swap old value for new
     p = {l: {k: [v[1], v[1]] for k,v in u.iteritems()} 
             for l,u in p.iteritems()}
 
