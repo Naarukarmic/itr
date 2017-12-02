@@ -1,0 +1,15 @@
+trans
+// transitions to be completed
+Altitude = ground |- take_off -> Altitude := low ;
+Altitude = low |- up -> Altitude := high;
+Altitude = high |- down -> Altitude := low;
+Altitude = low |- land -> Altitude := ground;
+
+assert
+// assertions
+AAltitude = Altitude ;
+
+// Graphics
+icone = case { Altitude= ground : 1,
+	      Altitude= low : 2,
+	      else 3 };

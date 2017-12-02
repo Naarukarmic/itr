@@ -1,0 +1,27 @@
+/*
+orders(MSS('Observer_FC2.O.true')) = 
+orders	product-number
+4	18
+total	18
+end
+*/
+products(MSS('Observer_FC2.O.true')) = 
+{'Aircraft.take_off', 'Aircraft.up', 'T1.stuck_open', 'T2.stuck_open'}
+{'Aircraft.take_off', 'Aircraft.up', 'T1.stuck_open', 'T3.stuck_open'}
+{'Aircraft.take_off', 'Aircraft.up', 'T2.stuck_open', 'T1.stuck_open'}
+{'Aircraft.take_off', 'Aircraft.up', 'T2.stuck_open', 'T3.stuck_open'}
+{'Aircraft.take_off', 'Aircraft.up', 'T3.stuck_open', 'T1.stuck_open'}
+{'Aircraft.take_off', 'Aircraft.up', 'T3.stuck_open', 'T2.stuck_open'}
+{'Aircraft.take_off', 'T1.stuck_open', 'Aircraft.up', 'T2.stuck_open'}
+{'Aircraft.take_off', 'T1.stuck_open', 'Aircraft.up', 'T3.stuck_open'}
+{'Aircraft.take_off', 'T2.stuck_open', 'Aircraft.up', 'T1.stuck_open'}
+{'Aircraft.take_off', 'T2.stuck_open', 'Aircraft.up', 'T3.stuck_open'}
+{'Aircraft.take_off', 'T3.stuck_open', 'Aircraft.up', 'T1.stuck_open'}
+{'Aircraft.take_off', 'T3.stuck_open', 'Aircraft.up', 'T2.stuck_open'}
+{'T1.stuck_open', 'Aircraft.take_off', 'Aircraft.up', 'T2.stuck_open'}
+{'T1.stuck_open', 'Aircraft.take_off', 'Aircraft.up', 'T3.stuck_open'}
+{'T2.stuck_open', 'Aircraft.take_off', 'Aircraft.up', 'T1.stuck_open'}
+{'T2.stuck_open', 'Aircraft.take_off', 'Aircraft.up', 'T3.stuck_open'}
+{'T3.stuck_open', 'Aircraft.take_off', 'Aircraft.up', 'T1.stuck_open'}
+{'T3.stuck_open', 'Aircraft.take_off', 'Aircraft.up', 'T2.stuck_open'}
+end

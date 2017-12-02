@@ -1,0 +1,20 @@
+trans
+//transitions
+// When it is working correctly, the transmission line can be stuck closed
+Status = ok |- stuck_closed -> Status := closed ;
+// When it is working correctly, the transmission line can be stuck open
+Status = ok |- stuck_open -> Status := open ;
+assert
+// assertions
+close_cmd_O = case {Status=ok : close_cmd_I , 
+	     Status=closed : true,
+               else false};
+// Status_O is equal to the Status
+Status_O = Status ;
+
+// Graphics
+icone = case { Status=ok and close_cmd_I=false : 1 ,
+               Status=ok and close_cmd_I=true : 2 , 
+	     Status=open : 3,
+               else 4};
+

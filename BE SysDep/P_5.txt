@@ -1,0 +1,16 @@
+Voter
+
+assert
+// assertions
+
+O = ((I1 and I2) or (I2 and I3) or (I1 and I3));
+
+
+StatusVoter
+
+assert
+// assertions
+O = case {I1 = I2 : I1,
+	I1 = I3 : I1,
+	I2 = I3 : I2,
+	else open};

@@ -1,0 +1,49 @@
+FC1
+
+
+assert
+// assertions
+O =  (if CAltitude = high then true else false); // Failure Condition FC1 is true whenever the Cabin Altitude is high
+
+icone = case { O=false : 1,
+	     else 2};
+
+
+FC2
+
+
+assert
+// assertions to be completed
+O =  (if (AAltitude = high) and (CAltitude = high) then true else false) ; 
+// Failure Condition FC2 is true whenever the Aircraft is in Cruise
+// and the Cabin Altitude is different from what is required in a normal flight
+
+// Graphics
+icone = case {O=false : 1,
+	    else 2};
+
+
+FC3
+
+
+assert
+// assertions
+O =  (if AAltitude = ground and CAltitude != ground then true else false) ; 
+// Failure Condition FC3 is true whenever the Aircraft is on ground
+// and the Cabin Altitude is different from what is required in a normal flight
+
+// Graphics
+icone = case {O=false : 1,
+	    else 2};
+
+
+Controller
+
+
+assert
+// assertions
+close_cmd = (if AAltitude = high then true else false) ;
+
+// Graphics
+icone = case { close_cmd=false : 1,
+		else 2};

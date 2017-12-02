@@ -1,0 +1,10 @@
+/*
+orders(MSS('Observer_FC2.O.true')) = 
+orders	product-number
+2	1
+total	1
+end
+*/
+products(MSS('Observer_FC2.O.true')) = 
+{'Aircraft.take_off', 'Aircraft.up'}
+end
