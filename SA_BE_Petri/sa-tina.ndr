@@ -1,0 +1,54 @@
+p 330.0 50.0 p0 1 n
+t 330.0 95.0 t1 0 w n
+t 330.0 195.0 t2 0 w n
+p 330.0 145.0 p1 0 w {Acquire IR} ne
+p 390.0 260.0 p3 0 e {Calculate bear pos} ne
+p 265.0 260.0 p2 0 w {Analyse light sig} nw
+t 265.0 325.0 t4 0 w n
+t 390.0 325.0 t5 0 w n
+p 390.0 400.0 p6 0 e {Calculate safety dist} ne
+p 265.0 400.0 p7 0 w IsABear nw
+t 265.0 465.0 t7 c 0 w n false n
+t 170.0 465.0 t6 c 0 w n true n
+p 105.0 520.0 p8 0 w {Send Alert} nw
+t 390.0 455.0 t9 0 w n
+p 390.0 520.0 p10 0 e BearNear ne
+t 350.0 575.0 t10 c 0 w n false n
+t 440.0 575.0 t11 c 0 w n true n
+p 485.0 640.0 p13 0 n {send sound} ne
+p 390.0 640.0 p12 0 n {send light} w
+t 435.0 700.0 t12 0 w n
+p 240.0 750.0 p9 0 n bot w
+t 800.0 495.0 t13 0 w n
+p 305.0 515.0 p11 0 n end ne
+t 100.0 600.0 t0 0 w n
+e p8 t0 1 n
+e p0 t1 1 n
+e t1 p1 1 n
+e p1 t2 1 n
+e t2 p2 1 n
+e t2 p3 1 n
+e p2 t4 1 n
+e p3 t5 1 n
+e t5 p6 1 n
+e t4 p7 1 n
+e p7 t6 1 n
+e p7 t7 1 n
+e t6 p8 1 n
+e t6 p9 1 n
+e p6 t9 1 n
+e t9 p10 1 n
+e t7 p11 1 n
+e p10 t10 1 n
+e t10 p11 1 n
+e p10 t11 1 n
+e t11 p12 1 n
+e t11 p13 1 n
+e p12 t12 1 n
+e p13 t12 1 n
+e t12 p9 1 n
+e p9 0.9831565968 274.5359721 t13 0.6771756865 147.1359915 1 n
+e t13 0.2966384177 121.1651765 p3 0.006362805673 225.1799281 1 n
+h {sa-tina}
+
+

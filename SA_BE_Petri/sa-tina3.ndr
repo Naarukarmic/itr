@@ -1,0 +1,107 @@
+t 330.0 95.0 t1 0 w n
+t 330.0 195.0 t2 0 w n
+p 330.0 145.0 p1 0 w {Acquire IR} ne
+p 390.0 260.0 p3 0 e {Calculate bear pos} ne
+p 265.0 260.0 p2 0 w {Analyse light sig} nw
+t 265.0 325.0 t4 0 w n
+t 390.0 325.0 t5 0 w n
+p 390.0 400.0 p6 0 e {Calculate safety dist} ne
+p 265.0 400.0 p7 0 w IsABear nw
+t 265.0 465.0 t7 c 0 w n false n
+t 170.0 465.0 t6 c 0 w n true n
+p 105.0 520.0 p8 0 w {Send Alert} nw
+t 390.0 455.0 t9 0 w n
+p 390.0 520.0 p10 0 e BearNear ne
+t 350.0 575.0 t10 c 0 w n false n
+t 440.0 575.0 t11 c 0 w n true n
+p 485.0 640.0 p13 0 n {send sound} ne
+p 390.0 640.0 p12 0 n {send light} w
+t 435.0 700.0 t12 0 w n
+t 800.0 495.0 t13 0 w n
+t 100.0 600.0 t0 0 w n
+p 1148.0 225.0 p4 0 w {Load FP} nw
+t 1148.0 255.0 t3 0 w n
+t 1148.0 185.0 t8 0 w n
+p 1148.0 295.0 p5 0 w {Go WP0} nw
+p 1143.0 360.0 p14 0 w {Read next WP} nw
+t 1143.0 330.0 t14 0 w n
+t 1143.0 405.0 t15 0 w n
+p 1143.0 445.0 p15 0 w {Go next WP} nw
+t 1143.0 490.0 t16 0 w n
+t 1143.0 570.0 t17 0 w n
+t 1093.0 665.0 t18 c 0 w n true nw
+t 1343.0 490.0 t19 c 0 w n false nw
+p 1093.0 715.0 p18 0 w {Go Base} nw
+t 1093.0 760.0 t20 0 w n
+p 1093.0 805.0 p19 0 w Land nw
+p 1148.0 145.0 p20 0 w {Receive FP} nw
+t 1148.0 105.0 t21 0 w n
+p 1148.0 55.0 p21 1 w
+p 1143.0 615.0 p17 0 w IsLastWP e
+p 330.0 50.0 p0 0 n
+p 435.0 765.0 p22 0 n
+p 345.0 810.0 p24 0 n
+p 165.0 740.0 p9 0 n bot w
+p 260.0 745.0 p11 0 n end ne
+p 200.0 865.0 p25 0 n
+t 165.0 800.0 t22 0 w n
+t 260.0 800.0 t23 0 w n
+t 1465.0 490.0 t24 c 0 w n {New Mission} ne
+e t24 p21 1 n
+e p19 t24 1 n
+e t13 0.2985621533 133.150291 p1 0.962756921 176.8191166 1 n
+e p25 0.9933218443 262.2308144 t17 0.5925730269 262.1011255 1 n
+e p24 0.009585675537 199.3614807 t17 0.5464965515 208.3272666 1 n
+e t22 p25 1 n
+e t23 p25 1 n
+e p11 t23 1 n
+e p9 t22 1 n
+e p9 t11 1 n
+e t10 p24 1 n
+e p22 0.01808616512 185.1944924 t13 0.7197957769 180.2359565 1 n
+e t12 p22 1 n
+e t16 p0 1 n
+e p20 t8 1 n
+e t21 p20 1 n
+e t20 p19 1 n
+e p18 t20 1 n
+e t19 p14 1 n
+e p17 t19 1 n
+e t18 p18 1 n
+e p17 t18 1 n
+e t17 p17 1 n
+e t8 p4 1 n
+e p4 t3 1 n
+e t3 p5 1 n
+e p5 t14 1 n
+e t14 p14 1 n
+e p14 t15 1 n
+e t15 p15 1 n
+e p15 t16 1 n
+e p21 t21 1 n
+e p13 t12 1 n
+e p12 t12 1 n
+e t11 p13 1 n
+e t11 p12 1 n
+e p10 t11 1 n
+e p10 t10 1 n
+e t7 p11 1 n
+e t9 p10 1 n
+e p6 t9 1 n
+e t6 p9 1 n
+e t6 p8 1 n
+e p7 t7 1 n
+e p7 t6 1 n
+e t4 p7 1 n
+e t5 p6 1 n
+e p3 t5 1 n
+e p2 t4 1 n
+e t2 p3 1 n
+e t2 p2 1 n
+e p1 t2 1 n
+e t1 p1 1 n
+e p0 t1 1 n
+e p8 t0 1 n
+h {sa-tina3}
+
+
