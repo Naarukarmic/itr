@@ -1,0 +1,64 @@
+BE MINE PUMP - 12/11/17
+Pierre Lemarquand
+
+EX 1
+Initialisation attributs du mutex (pour la suite)
+Attributs : PRIO_PROTECT et plafond de priorité
+Initialisation mutex
+Destruction des attributs
+
+MI_read et MI_write : protection par le mutex User et abuser de CHECK_NZ pour
+vérfier le bon déroulement des opérations de pthreads
+
+
+EX2
+Initialisation du mutex - paramètres par défaut
+Initialisation de la condition - parmètres par défaut
+
+Receive : prendre mutex et boucler sur la condition
+rendre le mutex à la fin de l'opération
+
+Send : prendre le mutex, copier le message puis signaler la variable 
+conditionelle et rendre le mutex
+
+
+EX3 
+Body : initialiser le sémaphore timer Récupérer le temps actuel, y ajouter
+la période et boucler sur des ajouts de périodes et de récupération du sémaphore
+qui permettent l'exécution de la tâche
+
+Create task : 
+Initialiser les attributs des threads (utiles pour la suite)
+Attributs : SCHED_FIFO, priority (définie à la construction)
+Création du thread exécutant Body avec les paramètres de tâche (période..)
+
+
+EX4 
+Minepump : implémenter la logiques des tâches et leur initialisation
+WaterLevel : lire les capteurs, changer une valeur protégée par un mutex PCP
+MethLevel : lire le capteur, écrire le niveau d'alarme dans une valeur
+protégée par PCP, puis signaler le sémaphore du contrôleur 
+PumpCtrl : attendrele sémaphore de synchro, lire valeurs protégées par PCP
+Envoyer alarme etmodifier commande de la pompe, puis l'envoyer
+
+Initialisations : 
+Sémaphore de synchro créé bloqué, priorités pour les mutex
+protégées par PCP au niveau des plus élevées des tâches 
+Définition et initialisation des tâches périodiques (capteurs) 
+Définition des paramètres de threads pour les tâches sporadiques (pompe,
+alarme) 
+Création de ces threads
+Les priorités sont comme suit : capteurs = ressources > Alarme > Pompe
+
+On effectue un départ simultané de tous les threads en fixant une priorité 
+haute au thread main() et en la diminuant après création de tous les autres.
+
+Le main() boucle ensuite à l'infini avec un join
+
+EX5
+Résumé des modifications :
+Ordonnancement des tâches par FIFO par priorité
+Fixer les priorités pour les tâches : Capteurs > Alarme > Pompe
+Établir un protocole PCP pour les ressources partagées via mutex
+Fixer la priorité maximale du PCP au niveau de celle des capteurs
+Départ simultané des tâches pour vérifier la condition d'ordonnancement
