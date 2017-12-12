@@ -10,7 +10,9 @@ typedef struct _task_parameters {
   void (*job)(void); /* parameter-less function, executed at each dispatch */
 } task_parameters;
 
-void create_periodic_task (struct timespec period, void (*job) (void));
+void create_periodic_task (int priority, 
+	struct timespec period, 
+	void (*job) (void));
 /* Create a periodic task, of period 'period'. At each dispatch, it
  * will execute the job function
  */

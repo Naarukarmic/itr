@@ -34,8 +34,15 @@ m_integer LvlWater, LvlMeth;
    - else, if LLS is false, it sends "LowValue" to LvlWater m_integer
 */
 void WaterLevelMonitoring_Body(void) {
+  // printf("Read water level\n");
   int level = LowLevel;
-
+  if(ReadHLS()) {
+    level = HighLevel;
+    MI_write(LvlWater, level);
+  } 
+  else if (ReadLLS() == 0) {
+    MI_write(LvlWater, level);
+  }
 }
 
 /*****************************************************************************/
@@ -47,9 +54,17 @@ void WaterLevelMonitoring_Body(void) {
 */
 
 void MethaneMonitoring_Body (void) {
+  // printf("Read meth level\n");
   int level = Normal;
-  BYTE MS;
-
+  BYTE MS = ReadMS();
+  if (MS > MS_L2) {
+    level = Alarm2;
+  }
+  else if (MS > MS_L1) {
+    level = Alarm1;
+  }
+  MI_write(LvlMeth, level);
+  sem_post(&synchro);
 }
 
 /*****************************************************************************/
@@ -65,9 +80,33 @@ void MethaneMonitoring_Body (void) {
 */
 
 void *PumpCtrl_Body(void *no_argument) {
-  int niveau_eau, niveau_alarme, alarme;
+  int niveau_eau, niveau_alarme;
+  char alarme;
   int cmd=0;
   for (;;) {
+    sem_wait(&synchro);
+    niveau_alarme = MI_read(LvlMeth);
+    niveau_eau = MI_read(LvlWater);
+
+    if(niveau_alarme != Normal) {
+      // printf("Send alarm\n");
+      alarme = 1;
+      msg_box_send(mbox_alarm, &alarme);
+    }
+
+    if(niveau_alarme == Alarm2) {
+      // printf("Stopping pump - high methane\n");
+      cmd = 0;
+    }
+    else if (niveau_eau == HighLevel) {
+      // printf("Turning on pump\n");
+      cmd = 1;
+    }
+    else if (niveau_eau == LowLevel) {
+      // printf("Stopping Pump - low water\n");
+      cmd = 0;
+    }
+    CmdPump(cmd);
   }
 }
 
@@ -92,25 +131,66 @@ int main(void) {
 #endif /* RTEMS */
 
   pthread_t T3,T4;
+  pthread_attr_t attr;
+  int s;
   printf ("START\n");
 
   InitSimu(); /* Initialize simulator */
 
   /* Initialize communication and synchronization primitives */
-  mbox_alarm =
-  sem_init(&synchro,
-  LvlWater =
-  LvlMeth =
+  mbox_alarm = msg_box_init(1);
+  sem_init(&synchro, 0, 0);
+  LvlWater = MI_init(40);
+  LvlMeth = MI_init(45);
+
+  /* Up the main thread prio */
+  struct sched_param param;
+  param.sched_priority = 99;
+  s = pthread_setschedparam(pthread_self(), SCHED_FIFO, &param);
+  CHECK_NZ(s);
 
   /* Create task WaterLevelMonitoring_Task */
+  struct timespec water_period;
+  water_period.tv_nsec = 250 * 1000 * 1000;
+  water_period.tv_sec = 0;
+  create_periodic_task(30, water_period, WaterLevelMonitoring_Body);
 
   /* Create task MethaneMonitoring_Task */
+  struct timespec meth_period;
+  meth_period.tv_nsec = 100 * 1000 * 1000;
+  meth_period.tv_sec = 0;
+  create_periodic_task(35, meth_period, MethaneMonitoring_Body);
 
   /* Create task PumpCtrl_Task */
+  s = pthread_attr_init(&attr);
+  CHECK_NZ(s);
+
+  s = pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
+  CHECK_NZ(s);
+  param.sched_priority = 30;
+  s = pthread_attr_setschedparam(&attr, &param);
+  CHECK_NZ(s);
+
+  s = pthread_create(&T3, &attr, PumpCtrl_Body, NULL);
+  CHECK_NZ(s);
 
   /* Create task CmdAlarm_Task */
+  param.sched_priority = 25;
+  s = pthread_attr_setschedparam(&attr, &param);
+  CHECK_NZ(s);
+  s = pthread_create(&T4, &attr, CmdAlarm_Body, NULL);
+  CHECK_NZ(s);
 
-  pthread_join(T3,0);
+  s = pthread_attr_destroy(&attr);
+  CHECK_NZ(s);
+
+  /* Lower main priority for simultaneous start */
+  param.sched_priority = 10;
+  s = pthread_setschedparam(pthread_self(), SCHED_FIFO, &param);
+  CHECK_NZ(s);
+
+  s = pthread_join(T3,0);
+  CHECK_NZ(s);
 
 #ifndef RTEMS
   return 0;

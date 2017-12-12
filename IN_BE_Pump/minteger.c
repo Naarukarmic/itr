@@ -10,7 +10,14 @@ m_integer MI_init(int priority) {
   m = (m_integer) malloc(sizeof(struct s_m_integer));
   (*m).value = 0;
   /* Configure mutex, using a concurrency control policy */
-  pthread_mutex_init(&m->mutex, NULL);
+  pthread_mutexattr_t attr;
+  pthread_mutexattr_init(&attr);
+
+  pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_PROTECT);
+  pthread_mutexattr_setprioceiling(&attr, priority);
+
+  pthread_mutex_init(&m->mutex, &attr);
+  pthread_mutexattr_destroy(&attr);
   return m;
 }
 
