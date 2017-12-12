@@ -88,12 +88,13 @@ void *PumpCtrl_Body(void *no_argument) {
     sem_wait(&synchro);
     niveau_alarme = MI_read(LvlMeth);
     niveau_eau = MI_read(LvlWater);
+    alarme = 0;
 
     if(niveau_alarme != Normal) {
       // printf("Send alarm\n");
       alarme = 1;
-      msg_box_send(mbox_alarm, &alarme);
     }
+    msg_box_send(mbox_alarm, &alarme);
 
     if(niveau_alarme == Alarm2) {
       // printf("Stopping pump - high methane\n");

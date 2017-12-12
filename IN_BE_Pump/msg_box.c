@@ -13,6 +13,7 @@
 /*****************************************************************************/
 msg_box msg_box_init(const unsigned elt_size) {
     msg_box mbox;
+    int s;
 
     /* Allocate message box */
     if (!(mbox=(msg_box)malloc(sizeof(struct s_msg_box))))
@@ -26,8 +27,10 @@ msg_box msg_box_init(const unsigned elt_size) {
     (*mbox).elt_size=elt_size;
 
     /* Create mutex and cond. var. */
-    pthread_mutex_init(&mbox->mutex, NULL);
-    pthread_cond_init(&mbox->not_empty, NULL);
+    s = pthread_mutex_init(&mbox->mutex, NULL);
+    CHECK_NZ(s);
+    s = pthread_cond_init(&mbox->not_empty, NULL);
+    CHECK_NZ(s);
 
     return mbox;
 }

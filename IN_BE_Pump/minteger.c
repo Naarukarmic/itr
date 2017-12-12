@@ -7,17 +7,23 @@
 /*****************************************************************************/
 m_integer MI_init(int priority) {
   m_integer m;
+  int s;
   m = (m_integer) malloc(sizeof(struct s_m_integer));
   (*m).value = 0;
   /* Configure mutex, using a concurrency control policy */
   pthread_mutexattr_t attr;
-  pthread_mutexattr_init(&attr);
+  s = pthread_mutexattr_init(&attr);
+  CHECK_NZ(s);
 
-  pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_PROTECT);
-  pthread_mutexattr_setprioceiling(&attr, priority);
+  s = pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_PROTECT);
+  CHECK_NZ(s);
+  s = pthread_mutexattr_setprioceiling(&attr, priority);
+  CHECK_NZ(s);
 
-  pthread_mutex_init(&m->mutex, &attr);
-  pthread_mutexattr_destroy(&attr);
+  s = pthread_mutex_init(&m->mutex, &attr);
+  CHECK_NZ(s);
+  s = pthread_mutexattr_destroy(&attr);
+  CHECK_NZ(s);
   return m;
 }
 
