@@ -43,7 +43,6 @@ int msg_box_receive(msg_box mbox, char *buf) {
   /* Copy the message */
   memcpy(buf,(*mbox).buf,(*mbox).elt_size);
   (*mbox).empty = true;
-
   pthread_mutex_unlock(&mbox->mutex);
   return (*mbox).elt_size;
 }

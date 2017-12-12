@@ -82,7 +82,7 @@ void MethaneMonitoring_Body (void) {
 void *PumpCtrl_Body(void *no_argument) {
   int niveau_eau, niveau_alarme;
   char alarme;
-  int cmd=0;
+  int cmd = 0;
   for (;;) {
     sem_wait(&synchro);
     niveau_alarme = MI_read(LvlMeth);
@@ -138,28 +138,28 @@ int main(void) {
   InitSimu(); /* Initialize simulator */
 
   /* Initialize communication and synchronization primitives */
-  mbox_alarm = msg_box_init(1);
+  mbox_alarm = msg_box_init(sizeof(BYTE));
   sem_init(&synchro, 0, 0);
-  LvlWater = MI_init(40);
-  LvlMeth = MI_init(45);
+  LvlWater = MI_init(20);
+  LvlMeth = MI_init(20);
 
   /* Up the main thread prio */
   struct sched_param param;
-  param.sched_priority = 99;
+  param.sched_priority = 90;
   s = pthread_setschedparam(pthread_self(), SCHED_FIFO, &param);
   CHECK_NZ(s);
 
   /* Create task WaterLevelMonitoring_Task */
   struct timespec water_period;
-  water_period.tv_nsec = 250 * 1000 * 1000;
+  water_period.tv_nsec = 750 * 1000 * 1000;
   water_period.tv_sec = 0;
-  create_periodic_task(30, water_period, WaterLevelMonitoring_Body);
+  create_periodic_task(20, water_period, WaterLevelMonitoring_Body);
 
   /* Create task MethaneMonitoring_Task */
   struct timespec meth_period;
   meth_period.tv_nsec = 100 * 1000 * 1000;
   meth_period.tv_sec = 0;
-  create_periodic_task(35, meth_period, MethaneMonitoring_Body);
+  create_periodic_task(20, meth_period, MethaneMonitoring_Body);
 
   /* Create task PumpCtrl_Task */
   s = pthread_attr_init(&attr);
@@ -167,7 +167,7 @@ int main(void) {
 
   s = pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
   CHECK_NZ(s);
-  param.sched_priority = 30;
+  param.sched_priority = 10;
   s = pthread_attr_setschedparam(&attr, &param);
   CHECK_NZ(s);
 
@@ -175,7 +175,7 @@ int main(void) {
   CHECK_NZ(s);
 
   /* Create task CmdAlarm_Task */
-  param.sched_priority = 25;
+  param.sched_priority = 15;
   s = pthread_attr_setschedparam(&attr, &param);
   CHECK_NZ(s);
   s = pthread_create(&T4, &attr, CmdAlarm_Body, NULL);
@@ -185,11 +185,11 @@ int main(void) {
   CHECK_NZ(s);
 
   /* Lower main priority for simultaneous start */
-  param.sched_priority = 10;
+  param.sched_priority = 5;
   s = pthread_setschedparam(pthread_self(), SCHED_FIFO, &param);
   CHECK_NZ(s);
 
-  s = pthread_join(T3,0);
+  s = pthread_join(T3, 0);
   CHECK_NZ(s);
 
 #ifndef RTEMS
