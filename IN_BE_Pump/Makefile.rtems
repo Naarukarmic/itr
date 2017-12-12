@@ -1,0 +1,27 @@
+#
+#  RTEMS_MAKEFILE_PATH is typically set in an environment variable
+#
+
+PGM=${ARCH}/minepump.exe
+
+# optional managers required
+MANAGERS=all
+DEFINES += -DRTEMS
+
+# C source names
+CSRCS = minepump.c minteger.c msg_box.c periodic_task.c	\
+	simu.c utils.c
+
+COBJS_ = $(CSRCS:.c=.o)
+COBJS = $(COBJS_:%=${ARCH}/%)
+
+include $(RTEMS_MAKEFILE_PATH)/Makefile.inc
+include $(RTEMS_CUSTOM)
+include $(PROJECT_ROOT)/make/leaf.cfg
+
+OBJS= $(COBJS) $(CXXOBJS) $(ASOBJS)
+
+all:    ${ARCH} $(PGM)
+
+$(PGM): $(OBJS)
+	$(make-exe)
