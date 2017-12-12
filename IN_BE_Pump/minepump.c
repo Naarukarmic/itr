@@ -63,6 +63,7 @@ void MethaneMonitoring_Body (void) {
   else if (MS > MS_L1) {
     level = Alarm1;
   }
+  // printf("AL LEVEL %d\n", level);
   MI_write(LvlMeth, level);
   sem_post(&synchro);
 }
@@ -116,10 +117,10 @@ void *PumpCtrl_Body(void *no_argument) {
 */
 
 void *CmdAlarm_Body() {
-  int value;
+  char value;
   for (;;) {
-    msg_box_receive(mbox_alarm,(char*)&value);
-    CmdAlarm(value);
+    msg_box_receive(mbox_alarm, &value);
+    CmdAlarm((int) value);
   }
 }
 
