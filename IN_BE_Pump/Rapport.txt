@@ -62,3 +62,17 @@ Fixer les priorités pour les tâches : Capteurs > Alarme > Pompe
 Établir un protocole PCP pour les ressources partagées via mutex
 Fixer la priorité maximale du PCP au niveau de celle des capteurs
 Départ simultané des tâches pour vérifier la condition d'ordonnancement
+
+Sur notre poste : on observe des opérations interdites
+Sous Linux, il faut avoir des permissions root pour changer les priorités
+des tâches en temps réel
+
+
+EX6
+Observation du scénario minepump_nogui sous Linux
+Passage sous RTEMS
+Ajout clé ssh punliques dans .ssh/authorizedkeys
+scp -r /folder name@prise.isae.fr:/dest_folder
+Make du project avec l'architecture RTEMS pour leon3
+Lancement du binaire obtenu, le fonctionnement est finalement conforme à
+celui observé sous UNIX après un petit fix sur le msg_receive et les types
