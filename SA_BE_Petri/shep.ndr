@@ -1,0 +1,11 @@
+t 155.0 170.0 t0 c 0 w n {receive mess} w
+p 155.0 260.0 p1 0 nw {alert state} ne
+t 155.0 355.0 t1 c 0 w n {receive bear gone} nw
+p 155.0 50.0 p0 1 nw Idle n
+e p1 t1 1 n
+e t1 0.0 203.0 p0 0.9991579182 189.0026455 1 n
+e p0 t0 1 n
+e t0 p1 1 n
+h shep
+
+

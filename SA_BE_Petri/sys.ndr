@@ -1,0 +1,129 @@
+t 265.0 85.0 t1 0 w n
+t 265.0 185.0 t2 0 w n
+p 265.0 135.0 p1 0 w {Acquire IR} ne
+p 325.0 250.0 p3 0 e {Calculate bear pos} ne
+p 200.0 250.0 p2 0 w {Analyse light sig} nw
+t 200.0 315.0 t4 0 w n
+p 200.0 390.0 p7 0 w IsABear nw
+p 325.0 510.0 p10 0 e BearNear ne
+t 375.0 565.0 t11 c 0 w n true n
+p 420.0 630.0 p13 0 n {send sound} ne
+p 325.0 630.0 p12 0 n {send light} e
+t 370.0 690.0 t12 0 w n
+p 265.0 40.0 p0 0 n
+p 370.0 755.0 p22 0 n
+p 280.0 800.0 p24 0 n end ne
+t 355.0 315.0 t5 0 w n
+p 355.0 385.0 p6 0 e {Calculate safety dist} ne
+t 355.0 445.0 t9 0 w n
+t 195.0 460.0 t6 c 0 w n true n
+t 25.0 580.0 t7 c 0 w n false n
+p 1275.0 195.0 p4 0 w {Load FP} nw
+t 1275.0 225.0 t8 0 w n
+t 1275.0 155.0 t14 0 w n
+p 1275.0 265.0 p5 0 w {Go WP0} nw
+p 1270.0 330.0 p9 0 w {Read next WP} nw
+t 1270.0 300.0 t15 0 w n
+t 1270.0 375.0 t16 0 w n
+p 1270.0 415.0 p11 0 w {Go next WP} nw
+t 1270.0 460.0 t17 0 w n
+t 1270.0 540.0 t18 0 w n
+p 1270.0 575.0 p15 0 w IsLastWP nw
+t 1220.0 635.0 t19 c 0 w n true nw
+p 1220.0 685.0 p16 0 w {Go Base} nw
+t 1220.0 730.0 t21 0 w n
+p 1220.0 775.0 p17 0 w Land nw
+p 1275.0 115.0 p18 0 w {Receive FP} nw
+t 1275.0 75.0 t22 0 w n
+p 1275.0 25.0 p19 1 w
+t 1595.0 460.0 t23 c 0 w n {New Mission} ne
+t 1005.0 150.0 t3 c 0 w n {receive mess} se
+p 1005.0 240.0 p14 0 nw {alert state} ne
+t 1005.0 335.0 t24 c 0 w n {receive bear gone} nw
+p 1005.0 30.0 p20 1 nw Idle n
+p 525.0 150.0 p8 0 w {Send Alert} nw
+t 280.0 565.0 t10 c 0 w n false n
+p 215.0 640.0 p21 0 w {cancel alert} nw
+t 515.0 510.0 t13 0 w n
+p 595.0 485.0 p23 0 nw Close w
+t 595.0 385.0 t27 c 0 w n move w
+t 735.0 485.0 t28 c 0 w n {drone intervention} e
+p 735.0 385.0 p26 0 ne Scared e
+t 735.0 285.0 t29 c 0 w n move e
+p 595.0 285.0 p25 1 n Far w
+t 1355.0 450.0 t20 c 0 w n false nw
+p 480.0 480.0 p27 0 n
+p 560.0 585.0 p28 0 n
+t 665.0 435.0 t30 c 0 w n {no move} nw
+e t10 0.9980106668 80.00624976 p25 0.6077060304 78.24321057 1 n
+e p25 0.5086725846 55.08175742 t10 0.04085639972 82.71033793 1 n
+e t30 p27 1 n
+e t30 p23 1 n
+e p26 t30 1 n
+e p28 t28 1 n
+e t12 p28 1 n
+e p27 t11 1 n
+e t27 p27 1 n
+e p25 t27 1 n
+e t27 p23 1 n
+e p23 t28 1 n
+e t28 p26 1 n
+e p26 t29 1 n
+e t29 p25 1 n
+e p21 0.7388380305 242.5963726 t24 0.7527596357 173.0260096 1 n
+e t10 p24 1 n
+e t10 p21 1 n
+e p8 t3 1 n
+e t3 p14 1 n
+e p20 t3 1 n
+e t24 0.0 203.0 p20 0.9991579422 189.0026453 1 n
+e p14 t24 1 n
+e p22 0.006118328226 78.05767099 t13 0.746021955 120.0374941 1 n
+e t12 p22 1 n
+e p13 t12 1 n
+e p12 t12 1 n
+e t11 p13 1 n
+e t11 p12 1 n
+e p10 t11 1 n
+e p10 t10 1 n
+e t9 p10 1 n
+e p6 t9 1 n
+e t6 0.2128423532 168.5734261 p8 0.5021078892 151.0132445 1 n
+e p7 0.5029745125 107.01869 t7 0.2432315326 94.08506789 1 n
+e p7 t6 1 n
+e t4 p7 1 n
+e t5 p6 1 n
+e p3 t5 1 n
+e p2 t4 1 n
+e t2 p2 1 n
+e p1 t2 1 n
+e t1 p1 1 n
+e p0 t1 1 n
+e t6 0.8055086293 46.81879964 p3 0.7164034525 229.085137 1 n
+e t7 0.7500000001 78.0 p24 0.4961656831 83.02409289 1 n
+e t13 0.2546796787 102.0441081 p3 0.002974512375 107.01869 1 n
+e p19 t22 1 n
+e p11 t17 1 n
+e t16 p11 1 n
+e p9 t16 1 n
+e t15 p9 1 n
+e p5 t15 1 n
+e t8 p5 1 n
+e p4 t8 1 n
+e t14 p4 1 n
+e t18 p15 1 n
+e p15 t19 1 n
+e t19 p16 1 n
+e p15 0.008224822594 58.07753438 t20 0.7533152484 48.01041554 1 n
+e t20 0.2466847516 48.01041554 p9 0.0 44.0 1 n
+e p16 t21 1 n
+e t21 p17 1 n
+e t22 p18 1 n
+e p18 t14 1 n
+e t17 0.4985790116 224.0089284 p0 0.0 282.0 1 n
+e p24 0.0 249.0 t18 0.5028417506 224.0357114 1 n
+e p17 0.002983805551 160.0281225 t23 0.75 128.0 1 n
+e t23 0.2482511149 182.0109887 p19 0.9990905533 175.0028571 1 n
+h sys small
+
+
