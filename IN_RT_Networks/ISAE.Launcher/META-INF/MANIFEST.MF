@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Launcher
+Bundle-SymbolicName: ISAE.Launcher;singleton:=true
+Bundle-Version: 1.0.0
+Require-Bundle: org.eclipse.core.runtime,
+ WoPANetsTechModel;bundle-version="1.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: fr.isae.WoPANets.analysis.nc.maths
