@@ -46,7 +46,7 @@ int main(){
     nBytes = recvfrom(clientSocket,buffer,1024,0,NULL, NULL);
 
     printf("Received from server: %s\n",buffer);*/
-    sleep(1000);
+    sleep(1);
   }
 
   return 0;

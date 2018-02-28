@@ -34,12 +34,10 @@ int main(){
       requesting client will be stored on serverStorage variable */
     nBytes = recvfrom(udpSocket,buffer,1024,0,(struct sockaddr *)&serverStorage, &addr_size);
 
-    /*Convert message received to uppercase*/
-    for(i=0;i<nBytes-1;i++)
-      buffer[i] = toupper(buffer[i]);
+    printf("%s\n", buffer);
 
-    /*Send uppercase message back to client, using serverStorage as the address*/
-    sendto(udpSocket,buffer,nBytes,0,(struct sockaddr *)&serverStorage,addr_size);
+    /*Send uppercase message back to client, using serverStorage as the address
+    sendto(udpSocket,buffer,nBytes,0,(struct sockaddr *)&serverStorage,addr_size);*/
   }
 
   return 0;
