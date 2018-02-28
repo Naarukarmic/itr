@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <string.h>
 #include <stdlib.h>
 #include <limits.h>
@@ -10,11 +11,11 @@
 #define N_PROCESSUS 4
 
 int main(){
-  int udpSocket, nBytes;
+  int udpSocket;
   char buffer[1024];
-  struct sockaddr_in serverAddr, clientAddr;
+  struct sockaddr_in serverAddr;
   struct sockaddr_storage serverStorage;
-  socklen_t addr_size, client_addr_size;
+  socklen_t addr_size;
   int i;
   int processusValues[N_PROCESSUS];
 
@@ -27,7 +28,7 @@ int main(){
   /*Initiate processus values*/
   for (i=0 ; i< N_PROCESSUS ; i++)
   {
-    processusValues[i]=0;
+    processusValues[i]=INT_MAX;
   }
 
   /*Create UDP socket*/
@@ -49,36 +50,42 @@ int main(){
   {
     /* Try to receive any incoming UDP datagram. Address and port of
       requesting client will be stored on serverStorage variable */
-    nBytes = recvfrom(udpSocket,buffer,1024,0,(struct sockaddr *)&serverStorage, &addr_size);
-
-    /*Convert message received to uppercase*/
-    for(i = 0; i < nBytes-1; i++)
-        buffer[i] = toupper(buffer[i]);
+    recvfrom(udpSocket,
+             buffer,
+             1024,
+             0,
+             (struct sockaddr *)&serverStorage,
+             &addr_size);
 
     /*Parse the incoming string*/
-    token = strtok(buffer, s);
+    token = strtok(buffer,s);
     id = atoi(token);
     while(token != NULL)
     {
         //printf("%s\n", token);
-        token = strtok(NULL, s);
+        token = strtok(NULL,s);
         if(token != NULL)
         {
             processusValues[id]=atoi(token);
         }
+    
     }
 
     /*Compute minimum*/
-    if(processusValues[id] < minimum) {
-        minimum = processusValues[id];
+
+    for(i = 0; i< N_PROCESSUS ; i++)
+    {
+        if(processusValues[i]<minimum)
+        {
+            minimum = processusValues[i];
+        }
     }
-    
-    if(old_minimum != minimum) {
+
+    if(old_minimum!=minimum)
+    {
         printf("Current minimum : %d\n",minimum);
     }
-    /*Send uppercase message back to client, using serverStorage as the address*/
-    sendto(udpSocket,buffer,nBytes,0,(struct sockaddr *)&serverStorage,addr_size);
-
+   
     old_minimum = minimum;
   }
 

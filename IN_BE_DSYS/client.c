@@ -8,8 +8,7 @@
 #include <string.h>
 #include <unistd.h>
 
-int main(int argc, char **argv){
-
+int main(int argc, char* argv[]){
   if(argc != 2) {
     printf("\n Use: ./client <id> \n");
     return 1;
@@ -18,7 +17,7 @@ int main(int argc, char **argv){
   int clientSocket, portNum, nBytes, v;
   char buffer[1024];
   char value[32];
-  char* id;
+  char id[32];
   struct sockaddr_in serverAddr;
   socklen_t addr_size;
 
@@ -30,19 +29,21 @@ int main(int argc, char **argv){
   serverAddr.sin_family = AF_INET;
   serverAddr.sin_port = htons(portNum);
   serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
-  memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);  
+  memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);    
 
   /*Initialize size variable to be used later on*/
   addr_size = sizeof serverAddr;
-  id = argv[1];
+
+  strcpy(id, argv[1]);
 
   while(1) {
     v = rand() % 100;
     sprintf(value, "%d", v);
 
     strcpy(buffer, id);
+    strcat(buffer, ":");
     strcat(buffer, value);
-    printf("%s",buffer);
+
     nBytes = strlen(buffer) + 1;
     
     /*Send message to server*/
