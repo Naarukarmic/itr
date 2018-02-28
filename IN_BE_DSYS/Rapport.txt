@@ -1,0 +1,18 @@
+BE - Systèmes distribués
+
+Objectif : Proposer une solution pour effectuer une centralisation de 
+	plusieurs valeurs situées sur différents processeurs, variant au cours 
+	du temps
+
+Le processeur principal effectuera alors une opération (ici un calcul du
+minimum) sur les résultats.
+
+Stratégie :
+	Le processeur principal est un serveur écoutant les datagrammes UDP 
+arrivant sur un port donné.
+Les autres processeurs sont des clients qui émettent ces datagrammes UDP.
+Les datagrammes contiennent un identifiant du serveur émetteur ainsi que la
+valeur actuelle en mémoire de ce serveur.
+
+Technologie :
+	Nous avons préféré

@@ -48,6 +48,7 @@ int main(){
 
   while(1)
   {
+    minimum = INT_MAX;
     /* Try to receive any incoming UDP datagram. Address and port of
       requesting client will be stored on serverStorage variable */
     recvfrom(udpSocket,
