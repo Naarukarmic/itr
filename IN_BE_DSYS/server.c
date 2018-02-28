@@ -84,9 +84,7 @@ int main(){
         printf("Current minimum : %d",minimum);
         printf("  Processus : %d\n",min_id);
     }
-    /*Send uppercase message back to client, using serverStorage as the address*/
-    //sendto(udpSocket,buffer,nBytes,0,(struct sockaddr *)&serverStorage,addr_size);
-
+   
     old_minimum = minimum;
   }
 
