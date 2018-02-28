@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <string.h>
 #include <stdlib.h>
 #include <limits.h>
@@ -10,11 +11,11 @@
 #define N_PROCESSUS 4
 
 int main(){
-  int udpSocket, nBytes;
+  int udpSocket;
   char buffer[1024];
-  struct sockaddr_in serverAddr, clientAddr;
+  struct sockaddr_in serverAddr;
   struct sockaddr_storage serverStorage;
-  socklen_t addr_size, client_addr_size;
+  socklen_t addr_size;
   int i;
   int processusValues[N_PROCESSUS];
 
@@ -51,11 +52,7 @@ int main(){
     minimum = INT_MAX;
     /* Try to receive any incoming UDP datagram. Address and port of
       requesting client will be stored on serverStorage variable */
-    nBytes = recvfrom(udpSocket,buffer,1024,0,(struct sockaddr *)&serverStorage, &addr_size);
-
-    /*Convert message received to uppercase*/
-    for(i=0;i<nBytes-1;i++)
-      buffer[i] = toupper(buffer[i]);
+    recvfrom(udpSocket,buffer,1024,0,(struct sockaddr *)&serverStorage, &addr_size);
 
     /*Parse the incoming string*/
     token = strtok(buffer,s);
