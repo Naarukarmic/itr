@@ -36,12 +36,16 @@ int main(){
     nBytes = strlen(buffer) + 1;
     
     /*Send message to server*/
-    sendto(clientSocket,buffer,nBytes,0,(struct sockaddr *)&serverAddr,addr_size);
+    sendto(clientSocket,
+           buffer,
+           nBytes,
+           0,
+           (struct sockaddr *) &serverAddr,addr_size);
 
     /*Receive message from server
     nBytes = recvfrom(clientSocket,buffer,1024,0,NULL, NULL);
 
-    printf("Received from server: %s\n",buffer); */
+    printf("Received from server: %s\n",buffer);*/
     sleep(1000);
   }
 
