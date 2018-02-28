@@ -27,7 +27,9 @@ make all
 ./server
 ./client <id>
 
-Il suffit de lancer les clients avec id de 0 à 3
+Il suffit de lancer les clients avec id de 0 à 3.
+Pour modifier le nombre de processus, il suffit de modifier le define associé
+dans server.c & client.c
 
 
 /* Script - problème de terminaison des processus
