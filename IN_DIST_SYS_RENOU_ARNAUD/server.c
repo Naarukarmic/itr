@@ -10,18 +10,6 @@
 #define CLIENT_BASE_PORT 8081
 
 
-void* thread_job(void *no_argument) {
-  pthread_t my_task_id = pthread_self();
-  int i = 0, iter = labs (random())/10;
-
-  printf("Thread %p : Start processing, %d iterations\n", my_task_id, iter);
-  while(i < iter) i++;
-
-  printf("Thread %p : End of processing\n", my_task_id);
-
-  pthread_exit(NULL);
-}
-
 int main(int argc, char ** argv) {
   if(argc < 2){
     printf("Usage: server [NB_CLIENTS]");
