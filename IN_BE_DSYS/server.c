@@ -62,7 +62,7 @@ int main(){
     id = atoi(token);
     while(token != NULL)
     {
-        //printf("%s\n", token);
+        /*printf("%s\n", token);*/
         token = strtok(NULL,s);
         if(token != NULL)
         {
@@ -72,7 +72,6 @@ int main(){
     }
 
     /*Compute minimum*/
-
     for(i = 0; i< N_PROCESSUS ; i++)
     {
         if(processusValues[i]<minimum)

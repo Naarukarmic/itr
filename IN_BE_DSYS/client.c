@@ -33,7 +33,6 @@ int main(int argc, char* argv[]){
 
   /*Initialize size variable to be used later on*/
   addr_size = sizeof serverAddr;
-
   strcpy(id, argv[1]);
 
   while(1) {
