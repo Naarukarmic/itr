@@ -1,5 +1,7 @@
 #!/bin/bash
 
+./server &
+
 ./client 0 &
 ./client 1 &
 ./client 2 &

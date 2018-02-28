@@ -15,4 +15,22 @@ Les datagrammes contiennent un identifiant du serveur émetteur ainsi que la
 valeur actuelle en mémoire de ce serveur.
 
 Technologie :
-	Nous avons préféré
+	Nous avons préféré utilisé le protocole UDP pour assurer les
+communications entre serveur et clients, pour éviter d'utiliser plusieurs ports
+pour les différentes liaisons TCP.
+Cet avantage est contrebalancé par la nécessité d'ajouter un identifiant dans
+les datagrammes échangés.
+
+Usage :
+
+make all
+./server
+./client <id>
+
+Il suffit de lancer les clients avec id de 0 à 3
+
+
+/* Script - problème de terminaison des processus
+chmod +x launchScript.sh
+bash launchScript.sh
+*/
