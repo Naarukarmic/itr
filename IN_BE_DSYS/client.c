@@ -29,7 +29,7 @@ int main(){
     // TODO random
     v = 12;
     sprintf(value, "%d", v);
-    strcpy(id, "1: ");
+    strcpy(id, "1:");
 
     strcpy(buffer, id);
     strcat(buffer, value);
@@ -38,11 +38,11 @@ int main(){
     /*Send message to server*/
     sendto(clientSocket,buffer,nBytes,0,(struct sockaddr *)&serverAddr,addr_size);
 
-    /*Receive message from server*/
-                nBytes = recvfrom(clientSocket,buffer,1024,0,NULL, NULL);
+    /*Receive message from server
+    nBytes = recvfrom(clientSocket,buffer,1024,0,NULL, NULL);
 
-    printf("Received from server: %s\n",buffer);
-
+    printf("Received from server: %s\n",buffer); */
+    sleep(1000);
   }
 
   return 0;
