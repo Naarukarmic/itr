@@ -1,63 +1,49 @@
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <netdb.h>
+/************* UDP CLIENT CODE *******************/
+
 #include <stdio.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 #include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <errno.h>
-#include <arpa/inet.h> 
 
-int main(int argc, char *argv[])
-{
-    int sockfd = 0, n = 0;
-    char recvBuff[1024];
-    struct sockaddr_in serv_addr; 
+int main(){
+  int clientSocket, portNum, nBytes, v;
+  char buffer[1024];
+  char value[32];
+  char id[32];
+  struct sockaddr_in serverAddr;
+  socklen_t addr_size;
 
-    if(argc != 2)
-    {
-        printf("\n Usage: %s <ip of server> \n",argv[0]);
-        return 1;
-    } 
+  /*Create UDP socket*/
+  clientSocket = socket(PF_INET, SOCK_DGRAM, 0);
 
-    memset(recvBuff, '0',sizeof(recvBuff));
-    if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-    {
-        printf("\n Error : Could not create socket \n");
-        return 1;
-    } 
+  /*Configure settings in address struct*/
+  serverAddr.sin_family = AF_INET;
+  serverAddr.sin_port = htons(7891);
+  serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+  memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);  
 
-    memset(&serv_addr, '0', sizeof(serv_addr)); 
+  /*Initialize size variable to be used later on*/
+  addr_size = sizeof serverAddr;
 
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(5000); 
+  while(1){
+    // TODO random
+    v = 12;
+    sprintf(value, "%d", v);
+    strcpy(id, "1: ");
 
-    if(inet_pton(AF_INET, argv[1], &serv_addr.sin_addr)<=0)
-    {
-        printf("\n inet_pton error occured\n");
-        return 1;
-    } 
+    strcpy(buffer, id);
+    strcat(buffer, value);
+    nBytes = strlen(buffer) + 1;
+    
+    /*Send message to server*/
+    sendto(clientSocket,buffer,nBytes,0,(struct sockaddr *)&serverAddr,addr_size);
 
-    if( connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
-    {
-       printf("\n Error : Connect Failed \n");
-       return 1;
-    } 
+    /*Receive message from server*/
+                nBytes = recvfrom(clientSocket,buffer,1024,0,NULL, NULL);
 
-    while ( (n = read(sockfd, recvBuff, sizeof(recvBuff)-1)) > 0)
-    {
-        recvBuff[n] = 0;
-        if(fputs(recvBuff, stdout) == EOF)
-        {
-            printf("\n Error : Fputs error\n");
-        }
-    } 
+    printf("Received from server: %s\n",buffer);
 
-    if(n < 0)
-    {
-        printf("\n Read error \n");
-    } 
+  }
 
-    return 0;
+  return 0;
 }
