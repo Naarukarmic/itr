@@ -12,7 +12,7 @@ int main(int argc, char **argv){
 
   if(argc != 2) {
     printf("\n Use: ./client <id> \n");
-    return(1);
+    return 1;
   }
 
   int clientSocket, portNum, nBytes, v;
@@ -22,9 +22,8 @@ int main(int argc, char **argv){
   struct sockaddr_in serverAddr;
   socklen_t addr_size;
 
-  portNum = 7891;
-
   /*Create UDP socket*/
+  portNum = 7891;
   clientSocket = socket(PF_INET, SOCK_DGRAM, 0);
 
   /*Configure settings in address struct*/
@@ -37,7 +36,7 @@ int main(int argc, char **argv){
   addr_size = sizeof serverAddr;
   id = argv[1];
 
-  while(1){
+  while(1) {
     v = rand() % 100;
     sprintf(value, "%d", v);
 
@@ -51,7 +50,8 @@ int main(int argc, char **argv){
            buffer,
            nBytes,
            0,
-           (struct sockaddr *) &serverAddr,addr_size);
+           (struct sockaddr *) &serverAddr,
+           addr_size);
 
     /*Receive message from server
     nBytes = recvfrom(clientSocket,buffer,1024,0,NULL, NULL);

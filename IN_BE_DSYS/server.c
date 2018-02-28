@@ -52,16 +52,16 @@ int main(){
     nBytes = recvfrom(udpSocket,buffer,1024,0,(struct sockaddr *)&serverStorage, &addr_size);
 
     /*Convert message received to uppercase*/
-    for(i=0;i<nBytes-1;i++)
-      buffer[i] = toupper(buffer[i]);
+    for(i = 0; i < nBytes-1; i++)
+        buffer[i] = toupper(buffer[i]);
 
     /*Parse the incoming string*/
-    token = strtok(buffer,s);
+    token = strtok(buffer, s);
     id = atoi(token);
     while(token != NULL)
     {
         //printf("%s\n", token);
-        token = strtok(NULL,s);
+        token = strtok(NULL, s);
         if(token != NULL)
         {
             processusValues[id]=atoi(token);
@@ -69,14 +69,12 @@ int main(){
     }
 
     /*Compute minimum*/
-    if(processusValues[id]< minimum)
-    {
+    if(processusValues[id] < minimum) {
         minimum = processusValues[id];
     }
     
-    if(old_minimum!=minimum)
-    {
-        printf("Current minium : %d\n",minimum);
+    if(old_minimum != minimum) {
+        printf("Current minimum : %d\n",minimum);
     }
     /*Send uppercase message back to client, using serverStorage as the address*/
     sendto(udpSocket,buffer,nBytes,0,(struct sockaddr *)&serverStorage,addr_size);
