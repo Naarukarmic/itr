@@ -1,0 +1,14 @@
+- Navigation
+   Calcule une nouvelle liste de way points (renvoie un booléen, à vrai si la liste a changé)
+- Guidage
+   Permet de mettre le WP courant à jour lorsqu'on l'a atteint
+- Pilotage
+   Permet d'avancer vers le WP courant sauf si on a l'ordre de s'arrêter (un booléen est mis à vrai si on avance)
+- Surveillance
+   Détecte un obstacle à l'aide de différents capteurs, et donne l'ordre d'arrêt d'urgence au pilotage et de replanif à la navigation si un obstacle est détecté.
+  Les capteurs sont : une caméra (activée s'il fait jour), un télémètre et un sonar (activés s'il fait nuit). Le temps d'activation de chaque capteur varie et va permettre de trouver des scénarios qui posent problème, (notammment si on allume et éteint la lumière trop vite).
+* télémètre : 3 ut pour s'activer
+* caméra : 1 ut
+* sonar : 2 ut
+
+- Capteur de lumière (inutile pour l'instant, puisque s'il tombe en panne, aucun mécanisme ne permet de le détecter ou d'y remédier. Donc autant utiliser la lumière "réelle" pour l'instant)
