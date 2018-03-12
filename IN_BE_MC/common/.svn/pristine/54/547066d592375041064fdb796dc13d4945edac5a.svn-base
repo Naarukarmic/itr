@@ -1,0 +1,64 @@
+
+MODULE surveillance (lumiere, obstacle_reel)
+  VAR
+    camera : {ON, OFF, ACT};
+    telemetre : {ON, OFF, ACT1, ACT2, ACT3};
+    sonar : {ON, OFF, ACT1, ACT2};
+  DEFINE
+    detection_active := (lumiere & camera = ON) | (!lumiere & telemetre = ON & sonar = ON);
+    obstacle_detecte := detection_active & obstacle_reel;
+  ASSIGN
+    init(camera) := OFF;
+    init(sonar) := OFF;
+    init(telemetre) := OFF;
+    next(camera) := case
+                      lumiere & (camera = OFF) : ACT;
+                      lumiere & (camera = ACT | camera = ON) : ON;
+                      !lumiere : OFF;
+                    esac;
+    next(sonar) := case
+                     !lumiere & (sonar = OFF) : ACT1;
+                     !lumiere & (sonar = ACT1) : ACT2;
+                     !lumiere & (sonar = ACT2 | sonar = ON) : ON;
+                     lumiere : OFF;
+                   esac;
+    next(telemetre) := case
+                         !lumiere & (telemetre = OFF) : ACT1;
+                         !lumiere & (telemetre = ACT1) : ACT2;
+                         !lumiere & (telemetre = ACT2) : ACT3;
+                         !lumiere & (telemetre = ACT3 | telemetre = ON) : ON;
+                         lumiere : OFF;
+                       esac;
+
+MODULE navigation (replanif)
+  VAR
+    change_liste_wps : boolean;
+  ASSIGN
+    next(change_liste_wps) := replanif;
+    
+MODULE guidage (change_liste_wps, avance, obstacle)
+  VAR
+    wp : 0..9;
+  ASSIGN
+    init(wp) := 0;
+    next(wp) := case
+                  avance & !obstacle & !change_list_wps & wp < 9 : wp + 1;
+                  avance & !obstacle & !change_list_wps & wp = 9 : wp + 1;
+                esac;
+      
+MODULE pilotage (ordre_arret)
+  VAR
+    avance : boolean;
+  ASSIGN
+    next(avance) := !ordre_arret;
+
+MODULE main
+  VAR
+    lumiere : boolean;
+    obstacle : boolean;
+    surv : surveillance(lumiere, FALSE);
+  ASSIGN
+    obstacle := TRUE;
+
+LTLSPEC
+  G (obstacle ->  F surv.obstacle_detecte)

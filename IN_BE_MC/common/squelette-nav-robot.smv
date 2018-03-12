@@ -1,0 +1,32 @@
+
+MODULE surveillance (lumiere, obstacle_reel)
+  VAR
+
+   DEFINE
+    detection_active := (lumiere & camera_active) | (!lumiere & telemetre_actif & sonar_actif);
+    
+  ASSIGN
+
+MODULE Navigation (replanif)
+  VAR
+
+  ASSIGN
+    
+MODULE Guidage (change_liste_wps, avance, obstacle)
+  VAR
+  ASSIGN
+      
+MODULE Pilotage (ordre_arret)
+  VAR
+
+  ASSIGN
+
+MODULE main
+  VAR
+
+  ASSIGN
+
+
+LTLSPEC
+  G (obstacle ->  F surv.obstacle_detecte)
+--  ....
