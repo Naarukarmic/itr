@@ -1,34 +1,30 @@
-
-MODULE Surveillance (lumiere, obstacle_reel)
+MODULE surveillance (lumiere, obstacle_reel)
   VAR
-    camera        : {ON, OFF, ACT};
-    telemetre     : {ON, OFF, ACT1, ACT2, ACT3};
-    sonar         : {ON, OFF, ACT1, ACT2};
+    camera : {ON, OFF};
+    sonar : {ON, OFF, ACT1};
+    telemetre : {ON, OFF, ACT1, ACT2};
   DEFINE
     detection_active := (lumiere & camera = ON) | (!lumiere & telemetre = ON & sonar = ON);
     obstacle_detecte := detection_active & obstacle_reel;
   ASSIGN
-    init(camera)      := OFF;
-    init(sonar)       := OFF;
-    init(telemetre)   := OFF;
-    next(camera)      := case
-                            lumiere & (camera = OFF)                : ACT;
-                            lumiere & (camera = ACT | camera = ON)  : ON;
-                            !lumiere                                : OFF;
-                          esac;
-    next(sonar)       := case
-                            !lumiere & (sonar = OFF)                : ACT1;
-                            !lumiere & (sonar = ACT1)               : ACT2;
-                            !lumiere & (sonar = ACT2 | sonar = ON)  : ON;
-                            lumiere                                 : OFF;
-                          esac;
-    next(telemetre)   := case
-                            !lumiere & (telemetre = OFF)            : ACT1;
-                            !lumiere & (telemetre = ACT1)           : ACT2;
-                            !lumiere & (telemetre = ACT2)           : ACT3;
-                            !lumiere & (telemetre = ACT3 | telemetre = ON) : ON;
-                            lumiere : OFF;
-                          esac;
+    init(camera) := OFF;
+    init(sonar) := OFF;
+    init(telemetre) := OFF;
+    next(camera) := case
+                      lumiere : ON;
+                      !lumiere : OFF;
+                    esac;
+    next(sonar) := case
+                     !lumiere & (sonar = OFF) : ACT1;
+                     !lumiere & (sonar = ACT1 | sonar = ON) : ON;
+                     lumiere : OFF;
+                   esac;
+    next(telemetre) := case
+                         !lumiere & (telemetre = OFF) : ACT1;
+                         !lumiere & (telemetre = ACT1) : ACT2;
+                         !lumiere & (telemetre = ACT2 | telemetre = ON) : ON;
+                         lumiere : OFF;
+                       esac;
 
 MODULE Navigation (replanif, wp_suivant)
   VAR
