@@ -1,0 +1,148 @@
+
+MODULE Surveillance (lumiere, obstacle_reel)
+  VAR
+    camera        : {ON, OFF, ACT};
+    telemetre     : {ON, OFF, ACT1, ACT2, ACT3};
+    sonar         : {ON, OFF, ACT1, ACT2};
+  DEFINE
+    detection_active := (lumiere & camera = ON) | (!lumiere & telemetre = ON & sonar = ON);
+    obstacle_detecte := detection_active & obstacle_reel;
+  ASSIGN
+    init(camera)      := OFF;
+    init(sonar)       := OFF;
+    init(telemetre)   := OFF;
+    next(camera)      := case
+                            lumiere & (camera = OFF)                : ACT;
+                            lumiere & (camera = ACT | camera = ON)  : ON;
+                            !lumiere                                : OFF;
+                          esac;
+    next(sonar)       := case
+                            !lumiere & (sonar = OFF)                : ACT1;
+                            !lumiere & (sonar = ACT1)               : ACT2;
+                            !lumiere & (sonar = ACT2 | sonar = ON)  : ON;
+                            lumiere                                 : OFF;
+                          esac;
+    next(telemetre)   := case
+                            !lumiere & (telemetre = OFF)            : ACT1;
+                            !lumiere & (telemetre = ACT1)           : ACT2;
+                            !lumiere & (telemetre = ACT2)           : ACT3;
+                            !lumiere & (telemetre = ACT3 | telemetre = ON) : ON;
+                            lumiere : OFF;
+                          esac;
+
+MODULE Navigation (replanif, wp_suivant)
+  VAR
+    exec_replanif : boolean;
+    dest_wp       : boolean;
+    nb_wps        : 0..10;
+  ASSIGN
+    init(nb_wps)          := 10;
+    init(exec_replanif)   := TRUE;
+    init(dest_wp)         := FALSE;
+    next(nb_wps)          := case
+                                dest_wp                               : 0;
+                                nb_wps = 0                            : 0;
+                                replanif & !dest_wp                   : 10;
+                                !replanif & wp_suivant & !dest_wp     : nb_wps - 1;
+                                !replanif & !wp_suivant & !dest_wp    : nb_wps;
+                              esac;
+    next(dest_wp)         := case 
+                                nb_wps = 0      : TRUE;
+                                TRUE            : dest_wp;
+                              esac;
+    next(exec_replanif)   := replanif;
+    
+MODULE Guidage (change_liste_wps, avance)
+  VAR
+    etat          : {courant_wp , vers_wp , prochain_wp};
+  DEFINE
+    wp_atteint    := (etat = prochain_wp);
+  ASSIGN
+    init(etat)    := courant_wp;
+    next(etat)    := case 
+                        change_liste_wps                                : courant_wp;
+                        !change_liste_wps & avance & etat = courant_wp  : vers_wp;
+                        !change_liste_wps & avance & etat = vers_wp     : {prochain_wp , vers_wp};
+                        !change_liste_wps & etat = prochain_wp          : courant_wp;
+                        !change_liste_wps & !avance                     : etat;  
+                      esac;
+      
+MODULE Pilotage (ordre_arret)
+  VAR
+    avance      : boolean;
+  ASSIGN
+    init(avance) := TRUE;
+    next(avance) := (! ordre_arret);
+
+MODULE main
+  VAR
+    lumiere       : boolean;
+    obstacle      : boolean;
+    surv          : Surveillance(lumiere, obstacle);
+    pilotage      : Pilotage(surv.obstacle_detecte);
+    guidage       : Guidage(surv.obstacle_detecte , pilotage.avance);
+    nav           : Navigation(surv.obstacle_detecte, guidage.wp_atteint);
+  ASSIGN
+    init(obstacle)  := FALSE;
+
+-------------------------------------------------------------------------------
+-- Est il toujours possible de se retrouver en mode detection ? 
+-- Non a cause de possibles variations rapides de l'etat lumiere
+-------------------------------------------------------------------------------
+LTLSPEC
+  G ( F surv.detection_active)
+
+-------------------------------------------------------------------------------
+-- Est il toujours possible de se retrouver en mode detection si pas lumiere? 
+-- Oui
+-------------------------------------------------------------------------------
+LTLSPEC
+  G ( ! lumiere) -> G (F surv.detection_active)
+
+-------------------------------------------------------------------------------
+-- Est il toujours possible de se retrouver en mode detection si  lumiere? 
+-- Oui
+-------------------------------------------------------------------------------
+LTLSPEC
+  G ( lumiere) -> G (F surv.detection_active)
+
+-------------------------------------------------------------------------------
+-- Si on peut toujours eventuellement tomber sur une sequence llll ou !l!l!l!l!l
+-- alors on peut toujours eventuellement avoir la detection_active
+-- Cette sequence correspond a la sequence minimale trouvee apres simulation
+-------------------------------------------------------------------------------
+LTLSPEC
+  G ( F ( (lumiere & X(lumiere) & X(X(lumiere)) & X(X(X(lumiere)))) | (!lumiere & !X(lumiere) & !X(X(lumiere)) & !X(X(X(lumiere))) & !X(X(X(X(lumiere))))) )) -> G (F surv.detection_active)
+
+-------------------------------------------------------------------------------
+-- Si on peut toujours eventuellement tomber sur une sequence llll ou !l!l!l!l!l
+-- alors on pourra quand même pas garantir la detection d un obstacle
+-- Car l obstacle peut changer d'etat au bout d'une iteration 
+-------------------------------------------------------------------------------
+LTLSPEC
+  G( (lumiere & X(lumiere) & X(X(lumiere)) & X(X(X(lumiere)))) | (!lumiere & !X(lumiere) & !X(X(lumiere)) & !X(X(X(lumiere))) & !X(X(X(X(lumiere))))) ) -> G(obstacle -> F surv.obstacle_detecte)
+
+-------------------------------------------------------------------------------
+-- En utilisant les resultats ci-dessus, si on prend l hypothese que la lumiere
+-- ne peut changer d etat qu au bout d au MOINS 3/4 iterations (strict minimum) 
+-- et qu un obstacle visible l est pendant au moins 3 iterations alors on
+-- garantit la detection de l obstacle
+-------------------------------------------------------------------------------
+LTLSPEC
+  G( (lumiere & X(lumiere) & X(X(lumiere)) & X(X(X(lumiere)))) | (!lumiere & !X(lumiere) & !X(X(lumiere)) & !X(X(X(lumiere))) & !X(X(X(X(lumiere))))) )  -> G(obstacle & X(obstacle) & X(X(obstacle)) & X(X(X(obstacle))) -> F surv.obstacle_detecte)
+
+-------------------------------------------------------------------------------
+-- Aurait du etre TRUE mais non vu qu'au final si on rencontre toujours d obstacles
+-- il faudra changer encore et encore la liste de waypoint donc on pourra jamais
+-- atteindre l etat final
+-------------------------------------------------------------------------------
+LTLSPEC
+  G( (lumiere & X(lumiere) & X(X(lumiere)) & X(X(X(lumiere)))) | (!lumiere & !X(lumiere) & !X(X(lumiere)) & !X(X(X(lumiere))) & !X(X(X(X(lumiere))))) ) & G(F(guidage.etat = prochain_wp))  -> G(obstacle & X(obstacle) & X(X(obstacle)) & X(X(X(obstacle))) -> F nav.dest_wp)
+
+-------------------------------------------------------------------------------
+-- Solution simple il y aura jamais une infinite d obstacles obstruant le chemin
+-- F G (!obstacke)
+-------------------------------------------------------------------------------
+LTLSPEC
+  G( (lumiere & X(lumiere) & X(X(lumiere)) & X(X(X(lumiere)))) | (!lumiere & !X(lumiere) & !X(X(lumiere)) & !X(X(X(lumiere))) & !X(X(X(X(lumiere))))) ) & G(F(guidage.etat = prochain_wp)) & (F G (!obstacle))  -> G(obstacle & X(obstacle) & X(X(obstacle)) & X(X(X(obstacle))) -> F nav.dest_wp)
+--  ....
