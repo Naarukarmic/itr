@@ -1,4 +1,4 @@
-MODULE surveillance (lumiere, obstacle_reel)
+MODULE Surveillance (lumiere, obstacle_reel)
   VAR
     camera    : {ON, OFF};
     sonar     : {ON, OFF, ACT1};
@@ -108,7 +108,7 @@ LTLSPEC
 -- Cette sequence correspond a la sequence minimale trouvee apres simulation
 -------------------------------------------------------------------------------
 LTLSPEC
-  G ( F ( (lumiere & X(lumiere) & X(X(lumiere)) & X(X(X(lumiere)))) | (!lumiere & !X(lumiere) & !X(X(lumiere)) & !X(X(X(lumiere))) & !X(X(X(X(lumiere))))) )) -> G (F surv.detection_active)
+  G ( F ( (lumiere & X(lumiere) & X(X(lumiere))) | (!lumiere & !X(lumiere) & !X(X(lumiere)) & !X(X(X(lumiere)))  ))) -> G (F surv.detection_active)
 
 -------------------------------------------------------------------------------
 -- Si on peut toujours eventuellement tomber sur une sequence llll ou !l!l!l!l!l
@@ -116,7 +116,7 @@ LTLSPEC
 -- Car l obstacle peut changer d'etat au bout d'une iteration 
 -------------------------------------------------------------------------------
 LTLSPEC
-  G( (lumiere & X(lumiere) & X(X(lumiere)) & X(X(X(lumiere)))) | (!lumiere & !X(lumiere) & !X(X(lumiere)) & !X(X(X(lumiere))) & !X(X(X(X(lumiere))))) ) -> G(obstacle -> F surv.obstacle_detecte)
+  G( (lumiere & X(lumiere) & X(X(lumiere)) ) | (!lumiere & !X(lumiere) & !X(X(lumiere)) & !X(X(X(lumiere))) )) -> G(obstacle -> F surv.obstacle_detecte)
 
 -------------------------------------------------------------------------------
 -- En utilisant les resultats ci-dessus, si on prend l hypothese que la lumiere
@@ -125,7 +125,7 @@ LTLSPEC
 -- garantit la detection de l obstacle
 -------------------------------------------------------------------------------
 LTLSPEC
-  G( (lumiere & X(lumiere) & X(X(lumiere)) & X(X(X(lumiere)))) | (!lumiere & !X(lumiere) & !X(X(lumiere)) & !X(X(X(lumiere))) & !X(X(X(X(lumiere))))) )  -> G(obstacle & X(obstacle) & X(X(obstacle)) & X(X(X(obstacle))) -> F surv.obstacle_detecte)
+  G( (lumiere & X(lumiere) & X(X(lumiere)) ) | (!lumiere & !X(lumiere) & !X(X(lumiere)) & !X(X(X(lumiere))) ))  -> G(obstacle & X(obstacle) & X(X(obstacle)) & X(X(X(obstacle))) -> F surv.obstacle_detecte)
 
 -------------------------------------------------------------------------------
 -- Aurait du etre TRUE mais non vu qu'au final si on rencontre toujours d obstacles
@@ -133,12 +133,12 @@ LTLSPEC
 -- atteindre l etat final
 -------------------------------------------------------------------------------
 LTLSPEC
-  G( (lumiere & X(lumiere) & X(X(lumiere)) & X(X(X(lumiere)))) | (!lumiere & !X(lumiere) & !X(X(lumiere)) & !X(X(X(lumiere))) & !X(X(X(X(lumiere))))) ) & G(F(guidage.etat = prochain_wp))  -> G(obstacle & X(obstacle) & X(X(obstacle)) & X(X(X(obstacle))) -> F nav.dest_wp)
+  G( (lumiere & X(lumiere) & X(X(lumiere)) ) | (!lumiere & !X(lumiere) & !X(X(lumiere)) & !X(X(X(lumiere)))  )) & G(F(guidage.etat = prochain_wp))  -> G(obstacle & X(obstacle) & X(X(obstacle)) & X(X(X(obstacle))) -> F nav.dest_wp)
 
 -------------------------------------------------------------------------------
 -- Solution simple il y aura jamais une infinite d obstacles obstruant le chemin
 -- F G (!obstacke)
 -------------------------------------------------------------------------------
 LTLSPEC
-  G( (lumiere & X(lumiere) & X(X(lumiere)) & X(X(X(lumiere)))) | (!lumiere & !X(lumiere) & !X(X(lumiere)) & !X(X(X(lumiere))) & !X(X(X(X(lumiere))))) ) & G(F(guidage.etat = prochain_wp)) & (F G (!obstacle))  -> G(obstacle & X(obstacle) & X(X(obstacle)) & X(X(X(obstacle))) -> F nav.dest_wp)
+  G( (lumiere & X(lumiere) & X(X(lumiere)) ) | (!lumiere & !X(lumiere) & !X(X(lumiere)) & !X(X(X(lumiere))) )) & G(F(guidage.etat = prochain_wp)) & (F G (!obstacle))  -> G(obstacle & X(obstacle) & X(X(obstacle)) & X(X(X(obstacle))) -> F nav.dest_wp)
 --  ....
