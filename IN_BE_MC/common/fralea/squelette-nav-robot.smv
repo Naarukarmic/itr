@@ -1,30 +1,30 @@
 MODULE surveillance (lumiere, obstacle_reel)
   VAR
-    camera : {ON, OFF};
-    sonar : {ON, OFF, ACT1};
+    camera    : {ON, OFF};
+    sonar     : {ON, OFF, ACT1};
     telemetre : {ON, OFF, ACT1, ACT2};
   DEFINE
     detection_active := (lumiere & camera = ON) | (!lumiere & telemetre = ON & sonar = ON);
     obstacle_detecte := detection_active & obstacle_reel;
   ASSIGN
-    init(camera) := OFF;
-    init(sonar) := OFF;
-    init(telemetre) := OFF;
-    next(camera) := case
-                      lumiere : ON;
-                      !lumiere : OFF;
-                    esac;
-    next(sonar) := case
-                     !lumiere & (sonar = OFF) : ACT1;
-                     !lumiere & (sonar = ACT1 | sonar = ON) : ON;
-                     lumiere : OFF;
-                   esac;
-    next(telemetre) := case
-                         !lumiere & (telemetre = OFF) : ACT1;
-                         !lumiere & (telemetre = ACT1) : ACT2;
-                         !lumiere & (telemetre = ACT2 | telemetre = ON) : ON;
-                         lumiere : OFF;
-                       esac;
+    init(camera)     := OFF;
+    init(sonar)      := OFF;
+    init(telemetre)  := OFF;
+    next(camera)     := case
+                          lumiere : ON;
+                          !lumiere : OFF;
+                        esac;
+    next(sonar)      := case
+                          !lumiere & (sonar = OFF) : ACT1;
+                          !lumiere & (sonar = ACT1 | sonar = ON) : ON;
+                          lumiere : OFF;
+                        esac;
+    next(telemetre)  := case
+                          !lumiere & (telemetre = OFF) : ACT1;
+                          !lumiere & (telemetre = ACT1) : ACT2;
+                          !lumiere & (telemetre = ACT2 | telemetre = ON) : ON;
+                          lumiere : OFF;
+                        esac;
 
 MODULE Navigation (replanif, wp_suivant)
   VAR
@@ -41,11 +41,11 @@ MODULE Navigation (replanif, wp_suivant)
                                 replanif & !dest_wp                   : 10;
                                 !replanif & wp_suivant & !dest_wp     : nb_wps - 1;
                                 !replanif & !wp_suivant & !dest_wp    : nb_wps;
-                              esac;
+                             esac;
     next(dest_wp)         := case 
                                 nb_wps = 0      : TRUE;
                                 TRUE            : dest_wp;
-                              esac;
+                             esac;
     next(exec_replanif)   := replanif;
     
 MODULE Guidage (change_liste_wps, avance)
@@ -61,14 +61,14 @@ MODULE Guidage (change_liste_wps, avance)
                         !change_liste_wps & avance & etat = vers_wp     : {prochain_wp , vers_wp};
                         !change_liste_wps & etat = prochain_wp          : courant_wp;
                         !change_liste_wps & !avance                     : etat;  
-                      esac;
+                     esac;
       
 MODULE Pilotage (ordre_arret)
   VAR
-    avance      : boolean;
+    avance       : boolean;
   ASSIGN
     init(avance) := TRUE;
-    next(avance) := (! ordre_arret);
+    next(avance) := (!ordre_arret);
 
 MODULE main
   VAR
