@@ -32,6 +32,7 @@
 #include <stdlib.h> 
 #include <string.h> 
 #include <sys/time.h> 
+#include <mpi.h> 
 #define W 943
 #define H 827
 #define IMAGE_IN "logo.pgm"
@@ -46,7 +47,7 @@ void read_image (int image[H][W], char file_name[], int *p_h, int *p_w, int *p_l
 void write_image (int image[H][W], char file_name[], int h, int w, int levels);
 
 
-int main(void)
+int main(int argc, char **argv)
 {
 
   int i, j, h, w, levels ;
@@ -54,38 +55,65 @@ int main(void)
 
   read_image (image_in, IMAGE_IN, &h, &w, &levels); 
 
-  /* image processing (just a copy in this example) */
-  gettimeofday(&tdeb, NULL);
+  MPI_Init(&argc,&argv);
+  int rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  int size;
+  MPI_Comm_size(MPI_COMM_WORLD, &size);
 
+  /* image processing */
+  gettimeofday(&tdeb, NULL);
+  
+  /* Copy */
   for (i = 0; i < h ; i++) {
     for (j = 0; j < w; j++) {
       image_out[i][j] = image_in[i][j]; 
     }
   }
+  
 
-  for (i = 1; i < h-1; i++) {
+  for (i = 1; i < h-1 ; i++) {
     for (j = 1; j < w-1; j++) {
-      image_out[i][j] = -1 * image_in[i-1][j-1] + 1*image_in[i-1][j+1];
-      image_out[i][j] += -3 * image_in[i][j-1] + 3*image_in[i][j+1];
-      image_out[i][j] += -1 * image_in[i+1][j-1] + 1*image_in[i+1][j+1];
+      int point[8] = {0};
+      /* point : [i, j, (i-1,j-1), (i-1,j+1),
+                (i,j-1), (i, j+1), (i+1,j-1), (i+1,j+1)] */
+
+      if(rank == 0) { 
+        point[0] = i;
+        point[1] = j;
+        point[2] = image_in[i-1][j-1];
+        point[3] = image_in[i-1][j+1];
+        point[4] = image_in[i][j-1];
+        point[5] = image_in[i][j+1];
+        point[6] = image_in[i+1][j-1];
+        point[7] = image_in[i+1][j+1];
+
+      } else {
+        int res[3];
+        MPI_Recv(&point, 8, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        res[0] = point[0];
+        res[1] = point[1];
+        res[2] = -1 * point[2] + 1*point[3];
+        res[2] += -3 * point[4] + 3*point[5];
+        res[2] += -1 * point[6] + 1*point[7];
+        if(res[2] < 0) {
+          res[2] = 0;
+        } else if (res[2] > 255) {
+          res[2] = 255;
+        }
+        MPI_Send(&res, 3, MPI_INT, 0, 0, MPI_COMM_WORLD);
+      }
+
     }
   }
 
-  for (i = 0; i < h ; i++) {
-    for (j = 0; j < w; j++) {
-      if(image_out[i][j] < 0) {
-        image_out[i][j] = 0;
-      } else if (image_out[i][j] > 255) {
-        image_out[i][j] = 255;
-      }
-    }
-  }
   gettimeofday(&tfin, NULL);
   printf ("computation time (microseconds): %ld\n",  (tfin.tv_sec - tdeb.tv_sec)*1000000 + (tfin.tv_usec - tdeb.tv_usec));
 
+  MPI_Finalize();
   write_image (image_out, IMAGE_OUT, h, w, levels);
 
-  return 1;
+  return 0;
 }
 
 void read_image (int image[H][W], char file_name[], int *p_h, int *p_w, int *p_levels){

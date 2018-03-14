@@ -56,13 +56,13 @@ int main(void)
 
   /* image processing (just a copy in this example) */
   gettimeofday(&tdeb, NULL);
-
+  /* Copy */
   for (i = 0; i < h ; i++) {
     for (j = 0; j < w; j++) {
       image_out[i][j] = image_in[i][j]; 
     }
   }
-
+  /* Filter */
   for (i = 1; i < h-1; i++) {
     for (j = 1; j < w-1; j++) {
       image_out[i][j] = -1 * image_in[i-1][j-1] + 1*image_in[i-1][j+1];
@@ -70,7 +70,7 @@ int main(void)
       image_out[i][j] += -1 * image_in[i+1][j-1] + 1*image_in[i+1][j+1];
     }
   }
-
+  /* Trim */
   for (i = 0; i < h ; i++) {
     for (j = 0; j < w; j++) {
       if(image_out[i][j] < 0) {
