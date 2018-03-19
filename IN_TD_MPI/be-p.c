@@ -45,15 +45,14 @@ int image_out[H][W];
 /* function declarations */
 void read_image (int image[H][W], char file_name[], int *p_h, int *p_w, int *p_levels);
 void write_image (int image[H][W], char file_name[], int h, int w, int levels);
+void main_img_sendto(int rank, int image_in[H][W], int n_lines, int size);
+void main_img_recv(int rank, int image_out[H][W], int n_lines, int size);
 
 
 int main(int argc, char **argv)
 {
-
   int i, j, h, w, levels ;
   struct timeval tdeb, tfin;
-
-  read_image (image_in, IMAGE_IN, &h, &w, &levels); 
 
   MPI_Init(&argc,&argv);
   int rank;
@@ -64,47 +63,57 @@ int main(int argc, char **argv)
   /* image processing */
   gettimeofday(&tdeb, NULL);
   
-  /* Copy */
-  for (i = 0; i < h ; i++) {
-    for (j = 0; j < w; j++) {
-      image_out[i][j] = image_in[i][j]; 
-    }
-  }
+  /* Image division */
+  int n_lines = H / size;
   
+  if(rank == 0) { 
+    read_image (image_in, IMAGE_IN, &h, &w, &levels);
 
-  for (i = 1; i < h-1 ; i++) {
-    for (j = 1; j < w-1; j++) {
-      int point[8] = {0};
-      /* point : [i, j, (i-1,j-1), (i-1,j+1),
-                (i,j-1), (i, j+1), (i+1,j-1), (i+1,j+1)] */
-
-      if(rank == 0) { 
-        point[0] = i;
-        point[1] = j;
-        point[2] = image_in[i-1][j-1];
-        point[3] = image_in[i-1][j+1];
-        point[4] = image_in[i][j-1];
-        point[5] = image_in[i][j+1];
-        point[6] = image_in[i+1][j-1];
-        point[7] = image_in[i+1][j+1];
-
-      } else {
-        int res[3];
-        MPI_Recv(&point, 8, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        res[0] = point[0];
-        res[1] = point[1];
-        res[2] = -1 * point[2] + 1*point[3];
-        res[2] += -3 * point[4] + 3*point[5];
-        res[2] += -1 * point[6] + 1*point[7];
-        if(res[2] < 0) {
-          res[2] = 0;
-        } else if (res[2] > 255) {
-          res[2] = 255;
-        }
-        MPI_Send(&res, 3, MPI_INT, 0, 0, MPI_COMM_WORLD);
-      }
-
+    for(i = 1; i < size; i++) {
+      main_img_sendto(i, image_in, n_lines, size);
     }
+    printf("0 - all sent done\n");
+
+    for(i = 1; i < size; i++) {
+      main_img_recv(i, image_out, n_lines, size);
+    }
+    printf("0 - all recv done\n");
+
+  } else {
+    int stripe[n_lines + 2][W];
+    int res[n_lines + 2][W];
+
+    printf("%d - recv\n", rank);
+    if(rank == size - 1) {
+      MPI_Recv(&stripe, W * (H - rank * (n_lines + 1)), 
+        MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    } else {
+      MPI_Recv(&stripe, W * (n_lines + 2), 
+        MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    }
+    printf("%d - recv done\n", rank);
+
+    for (i = 1; i < n_lines; i++) {
+      for (j = 1; j < W - 1; j++) {
+        res[i][j] = -1 * stripe[i-1][j-1] + 1*stripe[i-1][j+1];
+        res[i][j] += -3 * stripe[i][j-1] + 3*stripe[i][j+1];
+        res[i][j] += -1 * stripe[i+1][j-1] + 1*stripe[i+1][j+1];
+        if(res[i][j] < 0) {
+          res[i][j] = 0;
+        } else if (res[i][j] > 255) {
+          res[i][j] = 255;
+        }
+      }
+    }
+    printf("%d - calc done\n", rank);
+    if(rank == size - 1) {
+      MPI_Send(&res + W, W * (H - (rank-1) * n_lines), MPI_INT, 0, 0, MPI_COMM_WORLD);
+    } else {
+      MPI_Send(&res + W, W * n_lines, MPI_INT, 0, 0, MPI_COMM_WORLD);
+    }
+    printf("%d - sent done\n", rank);
+
+    
   }
 
   gettimeofday(&tfin, NULL);
@@ -171,5 +180,55 @@ void write_image (int image[H][W], char file_name[], int h, int w, int levels){
        fprintf (fout, "%d\n", image[i][j]); 
 
   fclose (fout);
+  return;
+}
+
+void main_img_sendto(int rank, int image_in[H][W], int n_lines, int size) {
+  printf("0 - Send to %d\n", rank);
+  if (rank == 1) {
+
+    MPI_Send(&image_in,
+      W * (n_lines + 2), 
+      MPI_INT, rank, 0, MPI_COMM_WORLD);
+
+  } else if (rank == size -1) {
+
+    MPI_Send(&image_in + (rank-1) * (n_lines + 1), 
+      W * (H - rank * (n_lines + 1)), 
+      MPI_INT, rank, 0, MPI_COMM_WORLD);
+
+  } else {
+
+    MPI_Send(&image_in + (rank-1) * (n_lines + 1),
+      W * (n_lines + 2), 
+      MPI_INT, rank, 0, MPI_COMM_WORLD);
+
+  }
+  printf("0 - Sent to %d\n", rank);
+  return;
+}
+
+void main_img_recv(int rank, int image_out[H][W], int n_lines, int size) {
+  printf("0 - Recv from %d\n", rank);
+  if (rank == 1) {
+
+    MPI_Recv(&image_out,
+      W * n_lines,
+      MPI_INT, rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+  } else if (rank == size -1) {
+
+    MPI_Recv(&image_out + (rank - 1) * n_lines, 
+      W * (H - (rank-1) * n_lines),
+      MPI_INT, rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+  } else {
+
+    MPI_Recv(&image_out + (rank - 1) * n_lines,
+      W * n_lines,
+      MPI_INT, rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+  }
+  printf("0 - Recv to %d\n", rank);
   return;
 }
