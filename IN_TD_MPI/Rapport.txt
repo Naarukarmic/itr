@@ -1,0 +1,54 @@
+Rapport BE Systèmes distribués
+Le Cam - Lemarquand
+
+Partie 1 - Traitement non-distribué de l'image
+Fichier  be-np.c
+gcc -Wall be-np.c -o be-np
+
+Étapes du programme :
+
+Lecture de l'image par les méthodes fournies
+
+Traitement :
+Partie copie, pour les bords
+
+Partie traitement à proprement parler, où l'on effectue le produit de 
+convolution de chaque pixel par ses voisins pondérés par le filtre choisi
+
+Partie "élagage", ou l'on ramène respectivement les valeurs négatives à 0 et
+les valeurs au-dessus de 256 à 255, afin de respecter le format de l'image
+
+Écriture de l'image finale à l'aide de la méthode fournie
+
+
+Partie 2 - Traitement distribué de l'image
+Fichier be-p.c
+mpicc be-p.c -o be-p
+mpiexec --np [n] be-p avec n >= 2
+
+On distingue deux comportements dans ce système, celui du maître (master) et 
+celui des esclaves (workers)
+
+Étapes du programme :
+
+Initalisation du MPI, dont sa taille et assignation du rang à chaque processus
+
+Processus master : (rang 0)
+Lecture de l'image
+Calcul du nombre de ligne à envoyer à chaque worker
+Envoi des paramètres (nombre de lignes et largeur) à chaque worker
+Envoi des bouts d'image (chunk) à chaque worker
+Attente passive grâce aux MPI_Recv
+Réception des chunks traités par les workers
+Écriture de l'image finale
+
+Processus esclaves : (rang != 0)
+Réception des paramètres (nombre de ligne et largeur)
+Réception des lignes à traiter
+Traitement à proprement parler - même méthodologie que dans la partie
+non-distribuée (bords - filtrage - élagage)
+Envoi des lignes traitées au processus maître
+
+Fin de la partie distribuée avec MPI_Finalize
+
+Considérations de performances :

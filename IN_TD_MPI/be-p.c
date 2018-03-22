@@ -1,38 +1,8 @@
-/* 
-  a simple example of image processing: copy an initial image to an output image
-  with the help of 2 functions read_image and write_image
-  begin
-    read the initial image from a file and copy the pixels in an array (image_in)
-    copy the elements of this array to a second array (image_out)
-    (this step will be replaced by a more elaborated processing)
-    copy the elements of the second array in a file
-  end
-
-  the format of the files is the pgm format (alias P2, ASCII file that a standard text editor car process)
-  the images are in black and white
-  this format is understood by a lot of image readers (eog, display, gimp, ...)
-  the (graphical) display of the images is done outside this program
-
-  the pixel arrays are static arrays, defined in the header of the file (there is more place
-  in the heap than in the stack (an obvious improvement is to use dynamy memory allocation (malloc)
-  the functions are fast coded, the numbers of parameters is minimal but the program works
-
-  constants are defined H (height), W (width), IMAGE_IN (name of the input file), IMAGE_OUT (output file)
-  you have to change these values if you want to change the image to process
-
-  to obtain the executable code:
-  gcc -Wall -std=c99 image_processing_example.c -o image_processing
-  to execute:
-  ./image_processing
-  to display:
-  eog logo2.pgm
-
-*/
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <string.h> 
 #include <sys/time.h> 
-#include <mpi.h> 
+#include <mpi.h>
 #define W 943
 #define H 827
 #define IMAGE_IN "logo.pgm"
@@ -45,85 +15,93 @@ int image_out[H][W];
 /* function declarations */
 void read_image (int image[H][W], char file_name[], int *p_h, int *p_w, int *p_levels);
 void write_image (int image[H][W], char file_name[], int h, int w, int levels);
-void main_img_sendto(int rank, int image_in[H][W], int n_lines, int size);
-void main_img_recv(int rank, int image_out[H][W], int n_lines, int size);
 
 
 int main(int argc, char **argv)
 {
-  int i, j, h, w, levels ;
-  struct timeval tdeb, tfin;
 
-  MPI_Init(&argc,&argv);
+  MPI_Init ( &argc, &argv);
+  
   int rank;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  int size;
-  MPI_Comm_size(MPI_COMM_WORLD, &size);
-
-  /* image processing */
-  gettimeofday(&tdeb, NULL);
+  int size; //nb process
   
-  /* Image division */
-  int n_lines = H / size;
+  int nb_line, id;
+  int i, j, h, w, k, l, levels ;
+    struct timeval tdeb, tfin;
+    
+  MPI_Status status;
+  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+  MPI_Comm_size(MPI_COMM_WORLD,&size);
   
-  if(rank == 0) { 
-    read_image (image_in, IMAGE_IN, &h, &w, &levels);
-
-    for(i = 1; i < size; i++) {
-      main_img_sendto(i, image_in, n_lines, size);
+  if(rank == 0){// master reads and send picture & parameters
+      read_image (image_in, IMAGE_IN, &h, &w, &levels); 
+      gettimeofday(&tdeb, NULL);
+      int nb_line = (int) h / size; // cast to make the compiler happy
+      int id;
+      // sending params
+      for (id = 1; id < size; id++) {
+        MPI_Send(&nb_line, 1, MPI_INT, id, 0, MPI_COMM_WORLD);
+        MPI_Send(&w, 1, MPI_INT, id, 0, MPI_COMM_WORLD);
+      }
+      // sending picture chunks
+      for (id = 1; id < size; id++) {
+        int ligne;
+        sleep(2); // fix for timing related issues
+        for (ligne = (id - 1) * nb_line; ligne < (id * nb_line) + 1; ligne++){
+          MPI_Send(image_in[ligne], w, MPI_INT, id, 0, MPI_COMM_WORLD);
+        }
+      }
+      // receiving processed chunks
+      for (id = 1; id < size; id++) {
+        int ligne;
+        for (ligne = (id - 1) * nb_line; ligne < id * nb_line + 1; ligne++){
+          MPI_Recv(image_out[ligne], w, MPI_INT, id, 0, MPI_COMM_WORLD, &status);
+        }
     }
-    printf("0 - all sent done\n");
+    gettimeofday(&tfin, NULL);
+    printf ("computation time (microseconds): %ld\n",  (tfin.tv_sec - tdeb.tv_sec)*1000000 + (tfin.tv_usec - tdeb.tv_usec));
 
-    for(i = 1; i < size; i++) {
-      main_img_recv(i, image_out, n_lines, size);
+    write_image(image_out, IMAGE_OUT, h, w, levels);
+  }  
+    
+  if (rank != 0){ // workers receiving params
+    MPI_Recv(&nb_line, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
+    MPI_Recv(&w, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
+    int ligne, i, j, k, l;
+    for(ligne = (rank - 1) * nb_line; ligne < rank * nb_line; ligne++){
+      // workers receiving chunk
+      MPI_Recv(image_in[ligne], w, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);   
     }
-    printf("0 - all recv done\n");
-
-  } else {
-    int stripe[n_lines + 2][W];
-    int res[n_lines + 2][W];
-
-    printf("%d - recv\n", rank);
-    if(rank == size - 1) {
-      MPI_Recv(&stripe, W * (H - rank * (n_lines + 1)), 
-        MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    } else {
-      MPI_Recv(&stripe, W * (n_lines + 2), 
-        MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    }
-    printf("%d - recv done\n", rank);
-
-    for (i = 1; i < n_lines; i++) {
-      for (j = 1; j < W - 1; j++) {
-        res[i][j] = -1 * stripe[i-1][j-1] + 1*stripe[i-1][j+1];
-        res[i][j] += -3 * stripe[i][j-1] + 3*stripe[i][j+1];
-        res[i][j] += -1 * stripe[i+1][j-1] + 1*stripe[i+1][j+1];
-        if(res[i][j] < 0) {
-          res[i][j] = 0;
-        } else if (res[i][j] > 255) {
-          res[i][j] = 255;
+    for (i = (rank - 1) * nb_line; i < rank * nb_line + 1 ; i++) { // chunk processing
+      for (j = 0; j < w; j++) {
+        if ( i==0 || i == h - 1 || j == 0 || j == w - 1){ //edge cases
+          image_out[i][j] = image_in[i][j];
+        }
+        else{ // filtering
+          image_out[i][j] = -1 * image_in[i-1][j-1] + 1*image_in[i-1][j+1];
+          image_out[i][j] += -3 * image_in[i][j-1] + 3*image_in[i][j+1];
+          image_out[i][j] += -1 * image_in[i+1][j-1] + 1*image_in[i+1][j+1];
+          
+          if(image_out[i][j] < 0){ // trimming excess values
+            image_out[i][j] = 0;
+          }
+          if(image_out[i][j] > 255){
+            image_out[i][j] = 255;
+          }
         }
       }
     }
-    printf("%d - calc done\n", rank);
-    if(rank == size - 1) {
-      MPI_Send(&res + W, W * (H - (rank-1) * n_lines), MPI_INT, 0, 0, MPI_COMM_WORLD);
-    } else {
-      MPI_Send(&res + W, W * n_lines, MPI_INT, 0, 0, MPI_COMM_WORLD);
+    for(ligne = (rank - 1) * nb_line; ligne < rank * nb_line + 1; ligne++){ 
+      MPI_Send(image_out[ligne], w, MPI_INT, 0, 0, MPI_COMM_WORLD);
     }
-    printf("%d - sent done\n", rank);
-
-    
   }
-
-  gettimeofday(&tfin, NULL);
-  printf ("computation time (microseconds): %ld\n",  (tfin.tv_sec - tdeb.tv_sec)*1000000 + (tfin.tv_usec - tdeb.tv_usec));
-
+  
   MPI_Finalize();
-  write_image (image_out, IMAGE_OUT, h, w, levels);
-
   return 0;
 }
+
+  
+  
 
 void read_image (int image[H][W], char file_name[], int *p_h, int *p_w, int *p_levels){
   FILE *fin;
@@ -183,52 +161,3 @@ void write_image (int image[H][W], char file_name[], int h, int w, int levels){
   return;
 }
 
-void main_img_sendto(int rank, int image_in[H][W], int n_lines, int size) {
-  printf("0 - Send to %d\n", rank);
-  if (rank == 1) {
-
-    MPI_Send(&image_in,
-      W * (n_lines + 2), 
-      MPI_INT, rank, 0, MPI_COMM_WORLD);
-
-  } else if (rank == size -1) {
-
-    MPI_Send(&image_in + (rank-1) * (n_lines + 1), 
-      W * (H - rank * (n_lines + 1)), 
-      MPI_INT, rank, 0, MPI_COMM_WORLD);
-
-  } else {
-
-    MPI_Send(&image_in + (rank-1) * (n_lines + 1),
-      W * (n_lines + 2), 
-      MPI_INT, rank, 0, MPI_COMM_WORLD);
-
-  }
-  printf("0 - Sent to %d\n", rank);
-  return;
-}
-
-void main_img_recv(int rank, int image_out[H][W], int n_lines, int size) {
-  printf("0 - Recv from %d\n", rank);
-  if (rank == 1) {
-
-    MPI_Recv(&image_out,
-      W * n_lines,
-      MPI_INT, rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-  } else if (rank == size -1) {
-
-    MPI_Recv(&image_out + (rank - 1) * n_lines, 
-      W * (H - (rank-1) * n_lines),
-      MPI_INT, rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-  } else {
-
-    MPI_Recv(&image_out + (rank - 1) * n_lines,
-      W * n_lines,
-      MPI_INT, rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-  }
-  printf("0 - Recv to %d\n", rank);
-  return;
-}

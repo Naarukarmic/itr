@@ -145,3 +145,4 @@ void write_image (int image[H][W], char file_name[], int h, int w, int levels){
   fclose (fout);
   return;
 }
+
