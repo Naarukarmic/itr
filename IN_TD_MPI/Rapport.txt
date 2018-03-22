@@ -52,3 +52,17 @@ Envoi des lignes traitées au processus maître
 Fin de la partie distribuée avec MPI_Finalize
 
 Considérations de performances :
+Test en local (appels entre processus sur une même machine, pas d'I/O réseau)
+Ubuntu 17.10 Artful Aardvark - VMWare Player
+i7-4710HQ - 4GB RAM
+
+Non-parallèle : temps moyen de traitement 29ms
+Parallèle :
+2 workers - 17ms
+3 workers - 12ms
+4 workers - 9 ms
+
+On remarque un gain de performance considérable entre la version parallèle et
+la version non-parallèle. Les rendements sont cependant assez rapidement 
+diminué avec l'ajout de workers. Il est important de noter que les appels I/O
+en réseau sont aussi bien plus coûteux que des accès mémoire (9 fois environ).
