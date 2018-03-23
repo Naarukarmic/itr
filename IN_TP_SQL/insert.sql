@@ -33,6 +33,9 @@ INSERT INTO eleveur VALUES
 (54223, 'quentin', 'rangueil',  'toulouse', 128956),
 (54223, 'nono',    'rangueil',  'toulouse', 121456);
 
+INSERT INTO troupeau VALUES
+();
+
 INSERT INTO vache VALUES
-(1289, 'john', 'limousine', 'bon', 45, troupeau_id)
+(1289, 'john', 'limousine', 'bon', 45, troupeau_id),
 ();
