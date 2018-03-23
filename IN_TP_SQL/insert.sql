@@ -24,8 +24,14 @@ INSERT INTO exp_nou_rel VALUES
 (128956, 'basque'),
 (114126, 'hopscotch'),
 (114126, 'frogs'),
-(114126, 'snapper')
-;
+(114126, 'snapper');
+
+INSERT INTO eleveur VALUES
+(59323, 'lem',	   'rempart',   'toulouse', 123126),
+(54223, 'primate', 'rempart',   'toulouse', 114126),
+(54223, 'cyril',   'rangueil',  'toulouse', 123456),
+(54223, 'quentin', 'rangueil',  'toulouse', 128956),
+(54223, 'nono',    'rangueil',  'toulouse', 121456);
 
 INSERT INTO vache VALUES
 (1289, 'john', 'limousine', 'bon', 45, troupeau_id)
