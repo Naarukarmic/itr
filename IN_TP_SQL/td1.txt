@@ -1,0 +1,112 @@
+World Cup:
+
+b/
+SELECT nom FROM pays ORDER BY nom;
+
+c/
+SELECT paysl AS "Local", paysv AS "Visiteur" FROM match;
+
+d/
+SELECT * FROM match WHERE date='1986-06-05';
+
+e/
+SELECT paysl
+FROM match WHERE paysv='France'
+UNION
+SELECT paysv
+FROM match WHERE paysl='France';
+
+f/
+SELECT paysl 
+FROM match
+WHERE type= 'Finale' AND butsl > butsv
+UNION
+SELECT paysv 
+FROM match
+WHERE type= 'Finale' AND butsv > butsl;
+
+Bières:
+
+a/
+SELECT DISTINCT bar FROM sert
+WHERE biere IN (SELECT biere from aime WHERE buveur= 'Martin');
+
+SELECT DISTINCT bar
+FROM Sert
+NATURAL JOIN Aime
+WHERE buveur='Martin';
+
+
+b/
+SELECT DISTINCT buveur, bar
+FROM Aime 
+NATURAL JOIN Sert
+NATURAL JOIN Frequente;
+
+c/
+
+
+d/
+SELECT buveur 
+FROM Frequente
+EXCEPT
+SELECT DISTINCT buveur
+FROM Aime 
+NATURAL JOIN Sert
+NATURAL JOIN Frequente;
+
+
+World Cup redux
+a/
+OK
+
+b/
+SELECT paysl, paysv, SUM(buts), type, date FROM
+((SELECT paysl, paysv, butsl AS buts, type, date FROM match)
+UNION ALL
+(SELECT paysl, paysv, butsv AS buts, type, date FROM match)) AS R
+GROUP BY paysl, paysv, type, date;
+
+c/
+SELECT AVG(buts) FROM matchbutsglobal 
+WHERE paysl='France' OR paysv='France';
+
+d/
+SELECT SUM(buts) FROM
+((SELECT paysl, paysv, butsl AS buts FROM match WHERE paysl='France')
+UNION ALL
+(SELECT paysl, paysv, butsv AS buts FROM match WHERE paysv='France'))
+AS R;
+
+e/
+SELECT groupe, SUM(buts) 
+FROM matchbutsglobal JOIN pays ON paysl=nom
+WHERE type= 'Poule'
+GROUP BY groupe
+ORDER BY groupe;
+
+f/
+CREATE OR REPLACE FUNCTION winner(p1 text, p2 text, t text) 
+			RETURNS text AS $WINNER$
+DECLARE
+	match match%ROWTYPE;
+	b1 INTEGER;
+	b2 INTEGER;
+BEGIN
+	match := * FROM match WHERE
+		type=t
+		AND((paysl=p1 AND paysv=p2)
+		OR (paysl=p2 AND paysv=p1));
+	IF (match.paysv=p1) THEN b1:=match.butsv; ELSE b1:=match.butsl; END IF;
+	IF match.paysv=p2 THEN b2 :=match.butsv; ELSE b2 :=match.butsl; END IF;
+IF
+b1 > b2
+THEN
+RETURN p1;
+ELSE 
+RETURN p2;
+END IF;
+END;
+$WINNER$ LANGUAGE plpgsql;
+
+g/
