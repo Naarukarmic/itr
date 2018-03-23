@@ -110,3 +110,40 @@ END;
 $WINNER$ LANGUAGE plpgsql;
 
 g/
+DROP TRIGGER IF EXISTS trigger_moy ON rel;
+DROP TABLE rel;
+
+
+CREATE TABLE rel(
+	nom VARCHAR(20),
+	valeur INTEGER
+);
+
+CREATE OR REPLACE FUNCTION trigger_moyenne() 
+	RETURNS trigger as $trigger_moyenne$
+	DECLARE
+		moy FLOAT;
+		nb  INTEGER;
+	BEGIN
+		moy := AVG(valeur) FROM rel;
+		nb  := COUNT(*) FROM rel;
+		IF (nb * moy + NEW.valeur) / (nb + 1) < moy
+		THEN RETURN NULL;
+		ELSE RETURN NEW;
+		END IF;
+	END;
+$trigger_moyenne$ language plpgsql;
+
+INSERT INTO rel VALUES
+	('Alice', 10),
+	('Bob', 5),
+	('Carl', 20),
+	('Denise', 11),
+	('Esther', 6);
+
+CREATE TRIGGER trigger_moy
+	BEFORE INSERT ON rel
+	FOR EACH ROW
+	EXECUTE PROCEDURE trigger_moyenne();
+
+SELECT * FROM rel;
